@@ -139,3 +139,15 @@ test("rendered portfolio and journal navigation use direct directory URLs", () =
       assert.match(read(page), /href="\/blog\/endianness\/"/);
   }
 });
+
+test("Projects introduces SimpleJim as an early Android prototype and links its source", () => {
+  const html = read("projects/index.html");
+  const slot = [...html.matchAll(/<article\b[^>]*>[\s\S]*?<\/article>/g)]
+    .map(([card]) => card).find((card) => /<h2\b[^>]*>SimpleJim<\/h2>/.test(card));
+  assert.ok(slot, "SimpleJim project card missing");
+  assert.match(slot, /Early Android prototype/);
+  assert.match(slot, /offline lift log for Android.*sets, reps, and weight.*saved workout history/);
+  assert.match(slot, /href="https:\/\/github\.com\/po63njit\/SimpleJim"/);
+  assert.match(slot, /SimpleJim source on GitHub/);
+  assert.doesNotMatch(slot, /Play Store|Install now|Download APK/);
+});

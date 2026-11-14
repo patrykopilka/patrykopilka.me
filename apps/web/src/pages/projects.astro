@@ -1,12 +1,13 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-const placeholders = [
+const projectSlots = [
   {
     number: "01",
-    type: "Software & systems",
-    title: "A space for the next build.",
+    type: "Early Android prototype",
+    title: "SimpleJim",
     description:
-      "Selected projects will return with working demos, clear documentation, and the details that matter.",
+      "An offline lift log for Android. Record sets, reps, and weight, then revisit saved workout history.",
+    href: "https://github.com/po63njit/SimpleJim",
     shape: "cube",
   },
   {
@@ -37,14 +38,13 @@ const placeholders = [
       Good work takes<br /><em>a little tending.</em>
     </h1><div class="intro-bottom">
       <p>
-        I’m cleaning up the workbench. Projects will return here when they’re
-        ready to be explored properly.
+        A few things I’m building. I’ll add more as they’re ready to explore.
       </p><span class="status"><i></i> IN PROGRESS</span>
     </div>
   </section>
-  <section class="project-placeholders" aria-label="Upcoming project spaces">
+  <section class="project-placeholders" aria-label="Selected projects and work in progress">
     {
-      placeholders.map((p) => (
+      projectSlots.map((p) => (
         <article class="project-slot">
           <>
             <div class={`slot-art slot-art--${p.shape}`} aria-hidden="true">
@@ -59,9 +59,15 @@ const placeholders = [
                 <p class="eyebrow">{p.type}</p>
                 <h2>{p.title}</h2>
                 <p>{p.description}</p>
-                <span class="slot-status">
-                  Being prepared <span class="arrow-icon" aria-hidden="true" />
-                </span>
+                {p.href ? (
+                  <a class="slot-status slot-status--link" href={p.href}>
+                    {p.title} source on GitHub <span class="arrow-icon" aria-hidden="true" />
+                  </a>
+                ) : (
+                  <span class="slot-status">
+                    Being prepared <span class="arrow-icon" aria-hidden="true" />
+                  </span>
+                )}
               </>
             </div>
           </>
@@ -70,7 +76,7 @@ const placeholders = [
     }
   </section>
   <p class="projects-end">
-    In the meantime, you can find my repositories on <a
+    Find my other repositories on <a
       href="https://github.com/po63njit">GitHub</a
     >.
   </p>
@@ -211,6 +217,13 @@ const placeholders = [
     margin-top: 26px;
     font: 9px var(--mono);
     color: #71887d;
+  }
+  .slot-status--link {
+    color: var(--accent);
+  }
+  .slot-status--link:hover,
+  .slot-status--link:focus-visible {
+    text-decoration: underline;
   }
   .projects-end {
     font-size: 12px;

@@ -12,7 +12,7 @@ const read = (p) => readFileSync(resolve(dist, p), "utf8");
 
 test("production output has expected published pages and no review interface", () => {
   const articlePages = process.env.BLOG_EXPECT_ARTICLES ? process.env.BLOG_EXPECT_ARTICLES.split(",").map(slug => `blog/${slug}/index.html`) : [];
-  assert.deepEqual(files.sort(), [
+  assert.deepEqual(files.filter(path => !path.startsWith("blog/topics/")).sort(), [
     ...articlePages,
     "about/index.html",
     "blog/hello-world/index.html",
@@ -134,9 +134,12 @@ test("rendered portfolio and journal navigation use direct directory URLs", () =
   for (const section of ["about", "projects", "resume", "blog"]) {
     assert.match(read(`${section}/index.html`), new RegExp(`href="/${section}/" aria-current="page"`));
   }
+  const journal = read("blog/index.html");
+  const featured = /<a class="featured-article[^"]*" href="([^"]+)"/.exec(journal);
+  assert.ok(featured, "Journal latest article link is missing");
+  assert.ok(read("index.html").includes(`href="${featured[1]}"`), "Home and Journal must link to the same latest article");
   if (files.includes("blog/endianness/index.html")) {
-    for (const page of ["index.html", "blog/index.html"])
-      assert.match(read(page), /href="\/blog\/endianness\/"/);
+    assert.match(journal, /href="\/blog\/endianness\/"/);
   }
 });
 
@@ -150,4 +153,30 @@ test("Projects introduces SimpleJim as an early Android prototype and links its 
   assert.match(slot, /href="https:\/\/github\.com\/po63njit\/SimpleJim"/);
   assert.match(slot, /SimpleJim source on GitHub/);
   assert.doesNotMatch(slot, /Play Store|Install now|Download APK/);
+});
+
+test("topic links generate static filtered pages and preserve every matching article", () => {
+  const paths = files.filter(p => /^blog\/[^/]+\/index\.html$/.test(p));
+  const topicRoutes = html => new Set([...html.matchAll(/href="(\/blog\/topics\/[a-z0-9-]+\/)"/g)].map(([, route]) => route));
+  const tags = new Map(paths.map(path => [
+    '/' + path.replace(/index\.html$/, ''),
+    topicRoutes(read(path)),
+  ]));
+  const allTopics = new Set([...tags.values()].flatMap(topicSet => [...topicSet]));
+  assert.ok(allTopics.has('/blog/topics/intro/'));
+  assert.deepEqual(topicRoutes(read('blog/index.html')), allTopics);
+  assert.match(read('blog/index.html'), /href="\/blog\/" aria-current="page">All topics<\/a>/);
+  assert.deepEqual(
+    files.filter(p => p.startsWith('blog/topics/')).sort(),
+    [...allTopics].map(route => route.slice(1) + 'index.html').sort()
+  );
+  for (const route of allTopics) {
+    const html = read(route.slice(1) + 'index.html');
+    assert.match(html, new RegExp('href="' + route + '" aria-current="page"'));
+    assert.match(html, new RegExp('rel="canonical" href="https://patrykopilka.me' + route + '"'));
+    assert.match(html, /aria-label="Filter by topic"/);
+    const matches = [...tags].filter(([, topicSet]) => topicSet.has(route)).map(([post]) => post).sort();
+    const actual = [...html.matchAll(/href="(\/blog\/(?!topics\/)[^/"]+\/)"/g)].map(([, post]) => post).sort();
+    assert.deepEqual(actual, matches, route);
+  }
 });

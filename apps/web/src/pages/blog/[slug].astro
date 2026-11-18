@@ -1,5 +1,6 @@
 ---
 import BlogLayout from "../../layouts/BlogLayout.astro";
+import TopicNav from "../../components/blog/TopicNav.astro";
 import MemoryDiagram from "../../components/blog/MemoryDiagram.astro";
 import SectionHeading from "../../components/blog/SectionHeading.astro";
 import { getCollection } from "astro:content";
@@ -18,8 +19,9 @@ const dateLabel=post.data.date.toLocaleDateString("en-US",{month:"long",day:"num
     <MemoryDiagram />
   </section> : <header class="simple-article-header"><p class="eyebrow">FROM THE JOURNAL</p><h1>{post.data.title}</h1>{post.data.description&&<p>{post.data.description}</p>}</header>}
   <div class="article-meta"><div><span class="meta-label">BY</span><span>Patryk Opilka</span></div><div><span class="meta-label">PUBLISHED</span><time datetime={post.data.date.toISOString()}>{dateLabel}</time></div><div><span class="meta-label">READING TIME</span><span>{readMinutes} min</span></div>{byteOrder&&<a href="#byte-lab">Jump to byte lab ↙</a>}</div>
+  <TopicNav tags={post.data.tags} />
   <div class:list={["reading-layout",{"without-outline":outline.length===0}]}>
-    {outline.length>0 && <aside class="contents"><p class="eyebrow">ON THIS PAGE</p><nav aria-label="Article sections">{outline.map((h,i)=><><a href={`#${h.slug}`}><span>{String(i).padStart(2,"0")}</span>{h.text.replace(/^\d+\s+/,"")}</a>{byteOrder&&i===1&&<a href="#byte-lab"><span>↔</span>Interactive byte lab</a>}</>)}</nav><p class="toc-footer">FOLLOW THE DETAILS.<br />QUESTION THE BOUNDARIES.</p></aside>}
+    {outline.length>0 && <aside class="contents"><p class="eyebrow">ON THIS PAGE</p><nav aria-label="Article sections">{outline.map((h,i)=><><a href={`#${h.slug}`}><span>{String(i).padStart(2,"0")}</span>{h.text.replace(/^\d+\.?\s+/,"")}</a>{byteOrder&&i===1&&<a href="#byte-lab"><span>↔</span>Interactive byte lab</a>}</>)}</nav><p class="toc-footer">FOLLOW THE DETAILS.<br />QUESTION THE BOUNDARIES.</p></aside>}
     <article class="article-body" aria-label={post.data.title}>
       {byteOrder&&<div class="reading-mode"><span>{outline.filter(h=>/^\d+ /.test(h.text)).length} CHAPTERS{hero?.status&&` · ${hero.status}`}</span><a href="/blog/">All articles ↗</a></div>}
       <Content components={{ h2: SectionHeading }} />

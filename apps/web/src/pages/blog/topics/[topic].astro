@@ -1,0 +1,28 @@
+---
+import BlogLayout from "../../../layouts/BlogLayout.astro";
+import JournalList from "../../../components/blog/JournalList.astro";
+import TopicNav from "../../../components/blog/TopicNav.astro";
+import { topicLinks, topicSlug } from "../../../scripts/blog-topics";
+import { getCollection } from "astro:content";
+
+export async function getStaticPaths() {
+  const articles = (await getCollection("blog", ({ data }) => !data.draft))
+    .sort((a,b) => b.data.date.getTime() - a.data.date.getTime());
+  const tags = articles.flatMap(({ data }) => data.tags);
+  return topicLinks(tags).map(({ slug, label }) => ({
+    params: { topic: slug },
+    props: { tags, label, posts: articles.filter(({ data }) => data.tags.some(tag => topicSlug(tag) === slug)) },
+  }));
+}
+const { tags, label, posts } = Astro.props;
+---
+<BlogLayout title={`${label} articles — Patryk Opilka`} description={`Journal articles about ${label}.`}>
+  <section class="journal-intro">
+    <p class="eyebrow">THE JOURNAL / TOPICS</p>
+    <h1>{label}</h1>
+    <div class="journal-bottom"><p>{posts.length} {posts.length === 1 ? "article" : "articles"} on this topic.</p></div>
+  </section>
+  <TopicNav tags={tags} all selected={Astro.params.topic} />
+  <JournalList posts={posts} label="MATCHING ARTICLES" />
+  <p class="journal-topic-back"><a href="/blog/">← Back to all articles</a></p>
+</BlogLayout>

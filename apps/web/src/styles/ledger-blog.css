@@ -11,3 +11,12 @@
 .article-body pre.astro-code{background:#c6c6c6!important;color:#202020!important}
 .article-body pre.astro-code code,.article-body pre.astro-code span{color:inherit!important}
 .contents nav a span{opacity:1}
+
+/* Journal topics are ordinary links to pre-rendered pages. */
+.journal-topics{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:14px 0 0}
+.journal-topics-bar{margin:0 0 24px}
+.journal-topics a{display:inline-flex;align-items:center;min-height:38px;padding:6px 12px;border:1px solid var(--line);color:var(--fg);font:11px/1.3 var(--mono);overflow-wrap:anywhere}
+.journal-topics a[aria-current="page"]{background:var(--fg);color:var(--bg);border-color:var(--fg);font-weight:600}
+.journal-topic-back{margin:35px 0 52px;font:12px var(--mono)}
+.featured-article.featured-text-only{display:block}
+.featured-text-only .featured-copy>p:not(.eyebrow){max-width:65ch}

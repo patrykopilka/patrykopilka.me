@@ -23,7 +23,7 @@ The existing Hello World note remains at `apps/web/src/content/blog/hello-world.
 
 The collection schema requires `title` and `date`. New private manuscripts also require an explicit `slug` and `draft: false` before the production importer will accept them. The private `published.json` manifest is the publication allowlist; drafts must not appear there.
 
-The homepage shows the newest published post, and `/blog/` lists all published posts newest first. Tags do not control inclusion. Future dates do **not** schedule publication; a manifest-listed article with `draft: false` appears on the next successful production build.
+The homepage shows the newest published post, and `/blog/` lists all published posts newest first. Tags do not control inclusion. They create static, shareable topic pages under `/blog/topics/<tag>/` from published articles only. The Journal and each article link to those pages. Reuse existing tag spellings when writing about the same subject. Future dates do **not** schedule publication; a manifest-listed article with `draft: false` appears on the next successful production build.
 
 ## Content tests
 

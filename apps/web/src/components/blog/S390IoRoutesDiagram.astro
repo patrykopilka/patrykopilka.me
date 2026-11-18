@@ -1,0 +1,32 @@
+---
+import Frame from './S390LedgerFigure.astro';
+const paths=[
+  ['Channel commands','CCW device / I/O subchannel','Channel program for DASD','Channel facility / device','IRB and interpreted device status'],
+  ['QDIO data path','CCW setup for a QDIO-capable device','Shared input/output buffers','qeth or zfcp ↔ adapter/channel','Buffer state and queue progress'],
+  ['Virtio over CCW','Virtual CCW device / subchannel','Virtqueues for virtio-blk, net or SCSI','Virtual backend, e.g. QEMU','Used buffers / driver completion'],
+  ['zPCI','PCI function / BDF','Device-specific queues, MMIO and DMA','Presented PCI function','Device completion and optional IRQ']
+];
+---
+<Frame id="s390-io-routes" number="04" title="Four I/O paths: distinguish discovery from data movement" label="I/O TOPOLOGY" caption="Conceptual paths, not a wiring diagram. QDIO and virtio-CCW reuse CCW-related discovery/setup without making their shared queues ordinary CCW data transfers. An interrupt by itself does not establish delivery to a caller.">
+  <ol class="routes" aria-label="I/O paths">
+    {paths.map(([name, discovery, work, peer, evidence])=><li>
+      <h5>{name}</h5>
+      <dl>
+        <div><dt>Linux sees</dt><dd>{discovery}</dd></div>
+        <div><dt>Work moves via</dt><dd>{work}</dd></div>
+        <div><dt>Peer</dt><dd>{peer}</dd></div>
+        <div><dt>Check progress</dt><dd>{evidence}</dd></div>
+      </dl>
+    </li>)}
+  </ol>
+</Frame>
+<style>
+  .routes {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem;padding:0;margin:0;list-style:none}
+  .routes li {margin:0;padding:0;border:1px solid var(--line,#8e8e8e);background:var(--bg,#d1d1d1);font:.81rem/1.42 var(--sans,Arial,sans-serif)}
+  .routes h5 {margin:0;padding:.48rem .65rem;background:var(--fg,#202020);color:var(--bg,#d1d1d1);font:600 .77rem/1.45 var(--mono,monospace)}
+  .routes dl {margin:0}
+  .routes dl div {display:grid;grid-template-columns:minmax(5.6rem,38%) 1fr;gap:.5rem;padding:.4rem .65rem;border-top:1px solid var(--line,#8e8e8e)}
+  .routes dt {font:600 .66rem/1.45 var(--mono,monospace)}
+  .routes dd {margin:0;color:var(--muted,#484848)}
+  @media(max-width:600px) {.routes {grid-template-columns:1fr}}
+</style>

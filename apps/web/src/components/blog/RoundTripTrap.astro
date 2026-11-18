@@ -1,0 +1,26 @@
+<figure class="fixture-study" aria-labelledby="fixture-study-title">
+  <figcaption id="fixture-study-title">
+    <span>TEST MATRIX / LITTLE-ENDIAN FORMAT</span>
+    <strong>A passing round trip can still produce wrong bytes</strong>
+  </figcaption>
+  <p>Fixture for integer <code>0x1234</code>: offset +0 is <code>34</code>, offset +1 is <code>12</code>.</p>
+  <dl class="cases">
+    <div><dt>Correct LE encoder + decoder</dt><dd><code>0x1234 → 34 12 → 0x1234</code></dd><dd>Round trip: <strong>pass</strong>. Golden bytes: <strong>pass</strong>.</dd></div>
+    <div><dt>Wrong BE encoder + decoder</dt><dd><code>0x1234 → 12 34 → 0x1234</code></dd><dd>Round trip: <strong>pass</strong>. Golden bytes: <strong>fail</strong>.</dd></div>
+  </dl>
+  <p>Test decoding the independent fixture too: the wrong decoder reads <code>34 12</code> as <code>0x3412</code>.</p>
+</figure>
+
+<style>
+  .fixture-study { margin: 2rem 0; padding: clamp(.8rem, 3vw, 1.4rem); border: 1px solid currentColor; border-inline-start-width: 3px; }
+  .fixture-study figcaption { display: grid; gap: .2rem; margin: 0 0 .7rem; }
+  .fixture-study figcaption span { font: 600 .78rem/1.35 ui-monospace, monospace; letter-spacing: .1em; }
+  .fixture-study figcaption strong { font-size: 1.16rem; }
+  .fixture-study .cases { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: .55rem; margin: .75rem 0; }
+  .fixture-study .cases div { border: 1px solid currentColor; padding: .65rem; }
+  .fixture-study dt { font-weight: 700; }
+  .fixture-study dd { margin: .2rem 0 0; }
+  .fixture-study p, .fixture-study dd { font-size: .94rem; line-height: 1.5; }
+  .fixture-study p { margin: 0; }
+  .fixture-study code { overflow-wrap: anywhere; }
+</style>

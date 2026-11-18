@@ -1,0 +1,46 @@
+<figure class="wire-study" aria-labelledby="wire-study-title">
+  <figcaption id="wire-study-title">
+    <span>FIELD MAP / ORDINARY MEMORY</span>
+    <strong>One packed record, three independent fields</strong>
+  </figcaption>
+  <p class="direction">Offsets increase from left to right. Read the numbered field groups in order.</p>
+  <ol class="fields">
+    <li>
+      <span class="label">Tag · 1 byte</span>
+      <div class="bytes"><span><small>+0</small><code>a5</code></span></div>
+      <p>Keep <code>0xa5</code> as a byte.</p>
+    </li>
+    <li>
+      <span class="label">Length · LE16</span>
+      <div class="bytes">
+        <span><small>+1</small><code>34</code></span><span><small>+2</small><code>12</code></span>
+      </div>
+      <p>Decode <code>0x1234</code>.</p>
+    </li>
+    <li>
+      <span class="label">Code · BE16</span>
+      <div class="bytes">
+        <span><small>+3</small><code>ab</code></span><span><small>+4</small><code>cd</code></span>
+      </div>
+      <p>Decode <code>0xabcd</code>.</p>
+    </li>
+  </ol>
+  <p class="sequence"><strong>Check the span</strong> (5 bytes here) <span aria-hidden="true">→</span> <strong>Decode each field</strong> by its declared order <span aria-hidden="true">→</span> <strong>Use numeric values</strong> on either host.</p>
+  <p class="note">If the buffer begins at an even address, both 16-bit fields begin at odd addresses. Use a bytewise decoder or a suitable unaligned helper, not a native pointer cast. Re-encode each field separately when writing the record.</p>
+</figure>
+
+<style>
+  .wire-study { margin: 2rem 0; padding: clamp(.8rem, 3vw, 1.4rem); border: 1px solid currentColor; border-inline-start-width: 3px; }
+  .wire-study figcaption { display: grid; gap: .2rem; margin: 0 0 .7rem; }
+  .wire-study figcaption span, .wire-study .label, .wire-study small, .wire-study .direction { font: 600 .78rem/1.35 ui-monospace, monospace; }
+  .wire-study figcaption span { letter-spacing: .1em; }
+  .wire-study figcaption strong { font-size: 1.16rem; }
+  .wire-study .fields { list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); gap: .5rem; margin: .8rem 0; padding: 0; }
+  .wire-study .fields li { border: 1px solid currentColor; margin: 0; padding: .55rem .65rem; }
+  .wire-study .bytes { display: flex; gap: .35rem; margin: .35rem 0; }
+  .wire-study .bytes span { display: grid; gap: .18rem; text-align: center; }
+  .wire-study .bytes code { border: 1px solid currentColor; font-size: 1rem; font-weight: 700; padding: .15rem .45rem; }
+  .wire-study p { margin: 0; font-size: .94rem; line-height: 1.5; }
+  .wire-study .sequence { margin-top: .8rem; }
+  .wire-study .note { margin-top: .45rem; }
+</style>

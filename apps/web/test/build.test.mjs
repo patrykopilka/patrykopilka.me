@@ -180,3 +180,21 @@ test("topic links generate static filtered pages and preserve every matching art
     assert.deepEqual(actual, matches, route);
   }
 });
+
+test("long-form figures have accessible titles and static content", () => {
+  const check = (html, markers) => {
+    for (const id of markers) {
+      assert.match(html, new RegExp(`<figure[^>]+aria-labelledby="${id}"`), id);
+      assert.match(html, new RegExp(`id="${id}"`), id);
+    }
+  };
+  const root = new URL("../dist/blog/", import.meta.url);
+  const read = (slug) => {
+    try { return readFileSync(new URL(`${slug}/index.html`, root), "utf8"); }
+    catch (error) { if (error.code === "ENOENT") return ""; throw error; }
+  };
+  const endian = read("endianness");
+  if (process.env.BLOG_EXPECT_FIGURES === "1" || endian.includes("wire-study-title")) check(endian, ["wire-study-title", "device-study-title", "fixture-study-title"]);
+  const kernel = read("s390-linux-kernel");
+  if (process.env.BLOG_EXPECT_FIGURES === "1" || kernel.includes("s390-lowcore-title")) check(kernel, ["s390-lowcore-title", "s390-boot-paths-title", "s390-dat-indices-title", "s390-io-routes-title"]);
+});

@@ -1,0 +1,12 @@
+---
+import { type CollectionEntry } from "astro:content";
+const { posts, label = "EARLIER NOTES" } = Astro.props as { posts: CollectionEntry<"blog">[]; label?: string };
+---
+{posts.length > 0 && <section class="older-posts" aria-label={label}>
+  <div class="section-label"><span>{label}</span><span>{posts.length}</span></div>
+  {posts.map(post => <article>
+    <h2><a href={`/blog/${post.slug}/`}>{post.data.title} <span aria-hidden="true">↗</span></a></h2>
+    {post.data.description && <p>{post.data.description}</p>}
+    <time datetime={post.data.date.toISOString()}>{post.data.date.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric",timeZone:"UTC"})}</time>
+  </article>)}
+</section>}

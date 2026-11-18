@@ -1,0 +1,60 @@
+---
+const rows = [
+  {
+    label: 'Queue setup',
+    field: 'CCW_CMD_SET_VQ · size',
+    offset: 'Payload bytes 14–15',
+    bytes: '01 00',
+    correct: 'BE16 → 256 queue entries (0x0100).',
+    wrong: 'Little-endian would read 1 entry.',
+  },
+  {
+    label: 'Feature negotiation',
+    field: 'CCW_CMD_READ_FEAT · features',
+    offset: 'Payload bytes 0–3; index 01 follows',
+    bytes: '01 00 00 00',
+    correct: 'LE32 → 0x00000001. With index 1, word bit 0 is feature bit 32 (VIRTIO_F_VERSION_1).',
+    wrong: 'Big-endian would place the set bit at word bit 24, or feature bit 56.',
+  },
+  {
+    label: 'Shared descriptor ring',
+    field: 'virtq_desc · len',
+    offset: 'Descriptor bytes 8–11',
+    bytes: '00 10 00 00',
+    correct: 'LE32 → 4,096 bytes (0x00001000).',
+    wrong: 'Big-endian would read 1,048,576 bytes (0x00100000).',
+  },
+];
+---
+<section class="virtio-byte-drill" id="virtio-byte-drill" aria-labelledby="virtio-byte-drill-title">
+  <p class="kicker">BYTE DRILL / MODERN VIRTIO-CCW</p>
+  <h3 id="virtio-byte-drill-title">Three fields, two byte orders</h3>
+  <p>Start with the byte at the lowest offset on the left. For each field, predict the byte order and decoded value, then reveal the answer. These synthetic slices come from three separate structures, not one contiguous capture.</p>
+  <ol>
+    {rows.map(({ label, field, offset, bytes, correct, wrong }) => (
+      <li>
+        <strong>{label}</strong>
+        <p><code>{field}</code><br /><small>{offset}</small></p>
+        <code class="bytes">{bytes}</code>
+        <details>
+          <summary>Reveal {label.toLowerCase()} decode</summary>
+          <p><strong>{correct}</strong> {wrong}</p>
+        </details>
+      </li>
+    ))}
+  </ol>
+  <p><strong>Debugging rule:</strong> Name the command or shared structure, verify the field offset and width, then decode using its declared byte order. The queue size counts entries; the descriptor length counts bytes. Neither the CPU's endianness nor the word “CCW” tells you which encoding a field uses.</p>
+  <p>This uses the modern transport and a split virtqueue. Do not apply it to legacy virtqueue layout. See <a href="https://docs.oasis-open.org/virtio/virtio/v1.4/cs01/virtio-v1.4-cs01.html">OASIS VIRTIO 1.4 CS01</a>, §§2.7.5, 4.3.2.2, 4.3.2.4 and 6 for the feature assignment.</p>
+</section>
+
+<style>
+  .virtio-byte-drill { margin-block: 2rem; padding: clamp(.8rem, 3vw, 1.4rem); border: 1px solid currentColor; border-inline-start-width: 3px; overflow-wrap: anywhere; }
+  .virtio-byte-drill h3 { margin-block: .3rem .7rem; }
+  .virtio-byte-drill p { margin-block: .55rem; }
+  .virtio-byte-drill .kicker { font: 600 .78rem/1.35 ui-monospace, monospace; letter-spacing: .1em; }
+  .virtio-byte-drill ol { list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); gap: .6rem; padding: 0; margin-block: 1rem; }
+  .virtio-byte-drill li { border: 1px solid currentColor; margin: 0; padding: .65rem; min-inline-size: 0; }
+  .virtio-byte-drill .bytes { display: inline-block; border: 1px solid currentColor; padding: .2rem .45rem; font-size: 1rem; }
+  .virtio-byte-drill summary { cursor: pointer; padding-block: .65rem; text-decoration: underline; text-underline-offset: .18em; }
+  .virtio-byte-drill summary:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+</style>

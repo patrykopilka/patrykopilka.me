@@ -1,0 +1,42 @@
+---
+import Frame from './S390LedgerFigure.astro';
+const va = 0x0000000080123456n;
+const fields = [
+  {name:'R1', range:'63–53', shift:53n, width:11n, inactive:true, title:'Region first'},
+  {name:'R2', range:'52–42', shift:42n, width:11n, inactive:true, title:'Region second'},
+  {name:'R3', range:'41–31', shift:31n, width:11n, title:'Region third'},
+  {name:'Segment', range:'30–20', shift:20n, width:11n, title:'Segment'},
+  {name:'Page', range:'19–12', shift:12n, width:8n, title:'Page'},
+  {name:'Offset', range:'11–0', shift:0n, width:12n, title:'Offset'}
+].map(field=>({...field, hex:'0x'+((va >> field.shift) & ((1n << field.width)-1n)).toString(16)}));
+---
+<Frame id="s390-dat-indices" number="03" title="One virtual address, six bit fields" label="DAT / BASE PAGE" caption="Bit numbers are least-significant-bit-first as in Linux shift expressions. The example assumes a region-third ASCE and an ordinary 4 KiB mapping; shaded R1/R2 fields do not index tables in this walk.">
+  <div class="dat-address"><span>VIRTUAL ADDRESS</span><code>0x0000000080123456</code></div>
+  <dl class="dat-fields">
+    {fields.map(({name,title,range,hex,inactive}) => <div class:list={['dat-cell', {inactive}]}><dt><abbr title={title}>{name}</abbr><small>bits {range}</small></dt><dd>{hex}{inactive && <small>not walked</small>}</dd></div>)}
+  </dl>
+  <div class="dat-path">
+    <strong>Selected ASCE</strong>
+    <ol aria-label="Translation steps">
+      <li>Region third <b>[1]</b></li><li>Segment <b>[1]</b></li><li>Page <b>[0x23]</b></li><li>Frame base <b>+ 0x456</b></li>
+    </ol>
+  </div>
+  <p class="dat-note">Only a valid, permitted leaf supplies the frame base. The offset alone is not a physical address.</p>
+</Frame>
+<style>
+  .dat-address {display:flex;gap:.45rem 1rem;align-items:center;flex-wrap:wrap;font:.72rem/1.5 var(--mono,monospace);margin:0 0 .6rem}
+  .dat-address code {font-size:1rem}
+  .dat-fields {display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:1px;background:var(--line,#8e8e8e);border:1px solid var(--line,#8e8e8e);margin:0}
+  .dat-cell {background:var(--bg,#d1d1d1);padding:.45rem .3rem;text-align:center;min-width:0}
+  .dat-cell.inactive {background:color-mix(in srgb,var(--bg,#d1d1d1),var(--line,#8e8e8e) 30%)}
+  .dat-cell dt {font:600 .68rem/1.4 var(--mono,monospace)}
+  .dat-cell abbr {text-decoration:none}
+  .dat-cell small {display:block;font:400 .62rem/1.4 var(--mono,monospace);color:var(--muted,#484848)}
+  .dat-cell dd {margin:.28rem 0 0;font:600 .95rem/1.4 var(--mono,monospace)}
+  .dat-path {margin:.9rem 0 .4rem;font:.8rem/1.5 var(--sans,Arial,sans-serif)}
+  .dat-path ol {display:flex;gap:.4rem;flex-wrap:wrap;list-style:none;padding:0;margin:.35rem 0 0}
+  .dat-path li {margin:0;padding:.32rem .4rem;border:1px solid var(--line,#8e8e8e);font:.75rem/1.4 var(--mono,monospace)}
+  .dat-path li:not(:last-child)::after {content:' →';color:var(--muted,#484848)}
+  .dat-note {margin:0;font:.8rem/1.5 var(--sans,Arial,sans-serif)}
+  @media(max-width:560px) {.dat-fields {grid-template-columns:repeat(3,minmax(0,1fr))}}
+</style>

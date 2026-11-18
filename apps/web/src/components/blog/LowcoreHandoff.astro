@@ -1,0 +1,21 @@
+---
+import Frame from './S390LedgerFigure.astro';
+---
+<Frame id="s390-lowcore" number="01" title="Who saves what on a system call?" label="CONTROL TRANSFER" caption="Offsets are within the prefix area, not global physical addresses. Loading the new PSW does not save all general registers.">
+  <ol>
+    <li><span class="actor">USERSPACE</span><strong>Issue <code>svc</code></strong><span>The running PSW describes the interrupted context.</span></li>
+    <li><span class="actor">PROCESSOR</span><strong>Exchange PSWs through lowcore</strong><div class="slots"><div><code>0x0140</code><br />Save the old PSW</div><div><code>0x01c0</code><br />Load the new PSW</div></div></li>
+    <li><span class="actor">LINUX ENTRY CODE</span><strong>Save general registers</strong><span>Form a <code>pt_regs</code> frame, then hand off to the kernel’s syscall handler.</span></li>
+  </ol>
+  <p class="source"><a href="https://github.com/torvalds/linux/blob/v6.12/arch/s390/include/asm/lowcore.h">Linux v6.12 lowcore layout</a></p>
+</Frame>
+<style>
+  .actor{font:600 .68rem/1.2 var(--mono,monospace);letter-spacing:.10em}
+  ol{display:grid;grid-template-columns:1fr 1.28fr 1fr;gap:.65rem;list-style:none!important;margin:0!important;padding:0!important}
+  li{min-width:0;display:grid;align-content:start;gap:.4rem;margin:0!important;padding:.6rem;background:rgba(255,255,255,.34);border:1px solid #a5a294;font-size:.86rem;line-height:1.35}
+  li strong{font-size:1rem}
+  .slots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.32rem}
+  .slots div{border-top:1px solid #797669;padding-top:.22rem}
+  @media(max-width:680px){ol{grid-template-columns:1fr}}
+  .source{margin:.6rem 0 0;font:.75rem/1.45 var(--mono,monospace)}
+</style>

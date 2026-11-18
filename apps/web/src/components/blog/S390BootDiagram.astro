@@ -1,0 +1,49 @@
+---
+import Frame from './S390LedgerFigure.astro';
+const lanes = [
+  {
+    arch: 's390x · IPL',
+    steps: [
+      ['Platform / loader','Selected IPL or guest boot path hands the image and parameters to Linux.'],
+      ['Early image','startup → startup_kernel; set up boot data, relocation and early mappings.'],
+      ['Kernel entry','Load an entry PSW with DAT enabled; startup_continue establishes task/stack and calls startup_init.']
+    ]
+  },
+  {
+    arch: 'x86-64 · typical compressed boot',
+    steps: [
+      ['Platform / loader','Firmware and bootloader, or an EFI loader path, hand off the kernel.'],
+      ['Early image','Compressed x86 entry prepares the environment and extracts the kernel.'],
+      ['Kernel entry','Early 64-bit kernel startup prepares state before x86_64_start_kernel and its handoff.']
+    ]
+  }
+];
+---
+<Frame id="s390-boot-paths" number="02" title="Two ways into the same Linux initialization" label="BOOT HANDOFF" caption="Linux v6.12 · Reading order is top to bottom in each lane. EFI, direct boot and dump entry can change the outer route; the shared endpoint is not proof of root-device discovery.">
+  <div class="boot-lanes">
+    {lanes.map(({arch, steps}) => (
+      <div>
+        <h5>{arch}</h5>
+        <ol>
+          {steps.map(([title, detail], i) => <li><span aria-hidden="true">{String(i + 1).padStart(2, '0')}</span><strong>{title}</strong><span>{detail}</span></li>)}
+        </ol>
+      </div>
+    ))}
+  </div>
+  <div class="common">
+    <span aria-hidden="true">↓</span>
+    <div><strong>Both lanes reach <code>start_kernel()</code></strong><p>Common initialization calls the port’s <code>setup_arch()</code> hook; later initialization and device discovery follow.</p></div>
+  </div>
+</Frame>
+<style>
+  .boot-lanes {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem}
+  .boot-lanes h5 {margin:0 0 .45rem;font:600 .76rem/1.45 var(--mono,monospace)}
+  .boot-lanes ol {display:grid;gap:.35rem;margin:0;padding:0;list-style:none}
+  .boot-lanes li {display:grid;grid-template-columns:2.1em 1fr;gap:.1rem .5rem;border:1px solid var(--line,#8e8e8e);background:var(--bg,#d1d1d1);margin:0;padding:.52rem .6rem;font:.8rem/1.45 var(--sans,Arial,sans-serif)}
+  .boot-lanes li span:first-child {grid-row:span 2;font:.75rem/1.5 var(--mono,monospace);color:var(--muted,#484848)}
+  .boot-lanes li span:last-child {color:var(--muted,#484848)}
+  .common {display:flex;gap:.75rem;align-items:center;border-top:1px solid var(--fg,#202020);margin-top:.8rem;padding:.6rem .2rem 0;font:.8rem/1.45 var(--sans,Arial,sans-serif)}
+  .common > span {font-size:1.4rem;padding:0 .25rem}
+  .common p {margin:.2rem 0 0;font:inherit}
+  @media(max-width:540px) {.boot-lanes {grid-template-columns:1fr}}
+</style>

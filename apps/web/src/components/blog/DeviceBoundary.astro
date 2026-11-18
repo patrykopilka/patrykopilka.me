@@ -1,0 +1,32 @@
+<figure class="device-study" aria-labelledby="device-study-title">
+  <figcaption id="device-study-title">
+    <span>INTERFACE MAP / LINUX DRIVER</span>
+    <strong>Same value, different layer owns the conversion</strong>
+  </figcaption>
+  <p class="input">Starting point: host-order <code>u32 value = 0x12345678</code>.</p>
+  <div class="paths">
+    <div class="path">
+      <strong>01 · Standard LE MMIO register</strong>
+      <p class="step"><code>writel(value, reg)</code></p>
+      <p>The accessor takes a host value and implements the register’s little-endian contract. Don’t pass <code>cpu_to_le32(value)</code> to it.</p>
+    </div>
+    <div class="path">
+      <strong>02 · LE DMA descriptor field in RAM</strong>
+      <p class="step"><code>d-&gt;length = cpu_to_le32(value)</code></p>
+      <p>Here the driver encodes the field before storing it as <code>__le32</code>. The bytes at increasing RAM addresses are <code>78 56 34 12</code>.</p>
+    </div>
+  </div>
+  <p class="separate"><strong>Separate question:</strong> When may the device consume the descriptor? Byte conversion does not establish visibility, ownership, or doorbell ordering.</p>
+</figure>
+
+<style>
+  .device-study { margin: 2rem 0; padding: clamp(.8rem, 3vw, 1.4rem); border: 1px solid currentColor; border-inline-start-width: 3px; }
+  .device-study figcaption { display: grid; gap: .2rem; margin: 0 0 .7rem; }
+  .device-study figcaption span { font: 600 .78rem/1.35 ui-monospace, monospace; letter-spacing: .1em; }
+  .device-study figcaption strong { font-size: 1.16rem; }
+  .device-study .paths { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: .55rem; margin: .75rem 0; }
+  .device-study .path { border: 1px solid currentColor; min-width: 0; padding: .65rem; }
+  .device-study p { margin: 0; font-size: .94rem; line-height: 1.5; }
+  .device-study .step { border-block-start: 1px solid currentColor; margin-block: .45rem .25rem; padding-top: .35rem; }
+  .device-study code { overflow-wrap: anywhere; }
+</style>

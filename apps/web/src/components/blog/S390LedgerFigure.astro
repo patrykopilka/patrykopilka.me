@@ -1,0 +1,46 @@
+---
+interface Props {
+  id: string;
+  number: string;
+  title: string;
+  label: string;
+  caption: string;
+}
+const {id, number, title, label, caption} = Astro.props;
+---
+<figure class="s390-figure" id={id} aria-labelledby={id + '-title'} aria-describedby={id + '-caption'}>
+  <header class="s390-plate">
+    <span>FIG. {number} · S390X</span>
+    <span>{label}</span>
+  </header>
+  <div class="s390-figure-content">
+    <h4 id={id + '-title'}>{title}</h4>
+    <slot />
+  </div>
+  <figcaption id={id + '-caption'}>{caption}</figcaption>
+</figure>
+
+<style>
+  .s390-figure {
+    margin: 2rem 0;
+    border: 1px solid var(--line, #8e8e8e);
+    border-top: 3px double var(--fg, #202020);
+    color: var(--fg, #202020);
+    background: var(--surface, #c6c6c6);
+    min-width: 0;
+  }
+  .s390-plate, figcaption {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: .45rem 1rem;
+    padding: .7rem 1rem;
+    font: .68rem/1.5 var(--mono, monospace);
+    color: var(--muted, #484848);
+    letter-spacing: .04em;
+  }
+  .s390-plate {border-bottom: 1px solid var(--line, #8e8e8e)}
+  figcaption {border-top: 1px solid var(--line, #8e8e8e); letter-spacing: 0}
+  .s390-figure-content {padding: clamp(.8rem, 3vw, 1.5rem)}
+  h4 {margin: 0 0 1rem; font: 500 clamp(1.3rem, 3vw, 1.8rem)/1.15 var(--heading, Georgia, serif)}
+</style>

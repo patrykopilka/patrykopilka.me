@@ -1,0 +1,16 @@
+---
+import { topicLinks } from "../../scripts/blog-topics";
+const { tags, selected, all = false } = Astro.props as {
+  tags: string[];
+  selected?: string;
+  all?: boolean;
+};
+const links = topicLinks(tags);
+if (all) links.sort((a, b) => a.label.localeCompare(b.label, "en"));
+---
+{links.length > 0 && (
+  <nav class:list={["journal-topics", { "journal-topics-bar": all }]} aria-label={all ? "Filter by topic" : "Article topics"}>
+    {all && <a href="/blog/" aria-current={!selected ? "page" : undefined}>All topics</a>}
+    {links.map(({ slug, label, href }) => <a href={href} aria-current={selected === slug ? "page" : undefined}>{label}</a>)}
+  </nav>
+)}

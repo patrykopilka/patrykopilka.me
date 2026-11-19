@@ -3,34 +3,28 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 const projectSlots = [
   {
     number: "01",
-    id: "simplejim",
     type: "Early Android prototype",
     title: "SimpleJim",
-    spine: "Android / Offline",
-    label: "LIFT LOG",
-    description: "An offline lift log for Android.",
-    features: ["Record sets, reps, and weight.", "Autosave workout drafts locally.", "Revisit saved workout history."],
+    description:
+      "An offline lift log for Android. Record sets, reps, and weight, then revisit saved workout history.",
     href: "https://github.com/po63njit/SimpleJim",
+    shape: "cube",
   },
   {
     number: "02",
-    id: "workbench",
     type: "Hardware & experiments",
     title: "Back on the workbench.",
-    spine: "Hardware / Experiments",
-    label: "WORKBENCH",
-    description: "A place for experiments, prototypes, and lessons from making things work.",
-    features: [],
+    description:
+      "A place for experiments, prototypes, and lessons from making things work.",
+    shape: "wave",
   },
   {
     number: "03",
-    id: "tools",
     type: "Tools & everyday problems",
     title: "Useful things, made carefully.",
-    spine: "Tools / Everyday",
-    label: "TOOLS",
-    description: "More soon. For now, this is a deliberately quiet corner of the site.",
-    features: [],
+    description:
+      "More soon. For now, this is a deliberately quiet corner of the site.",
+    shape: "grid",
   },
 ];
 ---
@@ -39,252 +33,231 @@ const projectSlots = [
   title="Projects — Patryk Opilka"
   description="A workbench for software, hardware, and experiments."
 >
-  <section class="shelf-intro" aria-labelledby="projects-title">
-    <div class="shelf-intro-main">
-      <p class="shelf-kicker">The workbench <span aria-hidden="true">/</span> Selected work</p>
-      <h1 id="projects-title">Project <em>shelf.</em></h1>
-    </div>
-    <p>A few things I’m building. I’ll add more as they’re ready to explore.</p>
-  </section>
-
-  <section class="case-shelf" aria-label="Selected projects and work in progress" data-project-shelf>
-    <div class="shelf-rail">
-      <h2>Case index</h2>
-      <span>1 project <span aria-hidden="true">·</span> 2 placeholders</span>
-    </div>
-    <p class="shelf-help">
-      Open a case to see what’s inside.
-      <span class="shelf-keys" data-shelf-keys hidden> <kbd>←</kbd> <kbd>→</kbd> Move <span aria-hidden="true">·</span> <kbd>Enter</kbd> Open <span aria-hidden="true">·</span> <kbd>Esc</kbd> Close</span>
-    </p>
-    <div class="shelf-stage">
-      {projectSlots.map((project) => (
-        <details class={`project-case project-case--${project.id}`} name="public-project-cases">
-          <summary class="case-summary">
-            <span class="case-media" aria-hidden="true">
-              <span class="case-bed"><span>{project.number}</span><span>{project.href ? "FILE OPEN" : "RESERVED"}</span></span>
-              <span class="case-cover">
-                <span class="case-spine"><span>{project.number}</span><span>{project.spine}</span></span>
-                <span class="case-front">
-                  <span class="case-cover-index">P.O. / {project.number}</span>
-                  <span class="case-diagram"><i></i><i></i><i></i></span>
-                  <span class="case-cover-label">{project.label}</span>
-                </span>
-              </span>
-            </span>
-            <span class="case-ident">
-              <span class="case-kind">{project.type}</span>
-              <span class="case-title" role="heading" aria-level="3">{project.title}</span>
-              <span class="case-state" aria-hidden="true"><span class="case-state-open">Close</span><span class="case-state-close">Open</span></span>
-            </span>
-          </summary>
-          <div class="case-inside">
-            <p>{project.description}</p>
-            {project.features.length ? (
-              <div>
-                <h4>Features</h4>
-                <ul class="case-features">
-                  {project.features.map((feature) => <li>{feature}</li>)}
-                </ul>
-              </div>
-            ) : null}
-            {project.href ? (
-              <a class="case-source" href={project.href}>{project.title} source on GitHub</a>
-            ) : (
-              <p class="case-reserved">Being prepared</p>
-            )}
-          </div>
-        </details>
-      ))}
+  <section class="projects-intro">
+    <p class="eyebrow">The workbench / Selected work</p><h1>
+      Good work takes<br /><em>a little tending.</em>
+    </h1><div class="intro-bottom">
+      <p>
+        A few things I’m building. I’ll add more as they’re ready to explore.
+      </p><span class="status"><i></i> IN PROGRESS</span>
     </div>
   </section>
-
-  <p class="projects-end">Find my other repositories on <a href="https://github.com/po63njit">GitHub</a>.</p>
-</BaseLayout>
-
-<script>
-  const shelf = document.querySelector<HTMLElement>("[data-project-shelf]");
-  if (shelf) {
-    const summaries = [...shelf.querySelectorAll<HTMLElement>(".case-summary")];
-    const instructions = shelf.querySelector<HTMLElement>("[data-shelf-keys]");
-    if (instructions) instructions.hidden = false;
-    shelf.addEventListener("keydown", (event) => {
-      if (!(event.target instanceof Element) || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
-      const owner = event.target.closest<HTMLDetailsElement>(".project-case");
-      const summary = owner?.querySelector<HTMLElement>(".case-summary");
-      if (!owner || !summary) return;
-      if (event.key === "Escape" && owner.open) {
-        event.preventDefault();
-        owner.open = false;
-        summary.focus();
-        return;
-      }
-      if (event.target !== summary) return;
-      const index = summaries.indexOf(summary);
-      if (index < 0) return;
-      const last = summaries.length - 1;
-      const next = event.key === "ArrowLeft" ? (index + last) % summaries.length
-        : event.key === "ArrowRight" ? (index + 1) % summaries.length
-        : event.key === "Home" ? 0 : event.key === "End" ? last : -1;
-      if (next < 0) return;
-      event.preventDefault();
-      summaries[next].focus();
-    });
-  }
-</script>
-
-<style>
-  .shelf-intro {
-    display:grid; grid-template-columns:1.5fr 1fr; align-items:end; gap:32px;
-    padding:clamp(38px,6vw,84px) 0 clamp(24px,4vw,42px);
-  }
-  .shelf-kicker, .shelf-rail h2, .shelf-rail > span, .case-kind, .case-state, .case-inside h4,
-  .case-reserved {
-    font: 11px/1.4 var(--mono); letter-spacing:.12em; text-transform:uppercase;
-  }
-  .shelf-kicker {color:#a5c5b6;margin:0 0 14px}
-  .shelf-kicker span {margin-inline:5px;color:#91e7b5}
-  .shelf-intro h1 {font-size:clamp(3rem,9vw,7rem);line-height:.97;margin:0;font-weight:520}
-  .shelf-intro h1 em {font-style:normal;color:#a7f3d0}
-  .shelf-intro > p {font-size:16px;color:#a5b7ae;max-width:32ch;margin:0 0 2px}
-  .case-shelf {
-    --shelf-rule:#324b42; --shelf-soft:#9ab6a9;
-    border:1px solid var(--shelf-rule); border-bottom:3px solid #405e51;
-    background:
-      linear-gradient(180deg,#0b1611,#101a16 69%,#0a1410),
-      #0c1712;
-    box-shadow:0 14px 36px #0005;
-  }
-  .shelf-rail {
-    display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 16px;
-    padding:12px clamp(14px,2vw,25px);border-bottom:1px solid var(--shelf-rule);background:#0a120f;
-  }
-  .shelf-rail h2 {margin:0;color:#bff2d6;font-weight:650}
-  .shelf-rail > span {color:var(--shelf-soft);letter-spacing:.06em}
-  .shelf-help {margin:0;display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 16px;color:#b6cabe;padding:10px clamp(14px,2vw,25px);font-size:14px}
-  .shelf-keys {font:12px/1.8 var(--mono);color:var(--shelf-soft)}
-  .shelf-keys > span {margin-inline:3px}
-  kbd {font:inherit;padding:2px 4px;border:1px solid #547265;background:#10231a;color:#d9efdf;border-radius:2px}
-  .shelf-stage {
-    position:relative; isolation:isolate; display:grid; grid-template-columns:repeat(3,minmax(0,1fr));
-    align-items:start; gap:clamp(10px,1.8vw,22px); padding:5px clamp(12px,2vw,25px) 23px;
-  }
-  .shelf-stage::before {
-    content:""; position:absolute; z-index:-1; inset:7px 0 30px; pointer-events:none;
-    background:repeating-linear-gradient(90deg,#8cc6a40d 0 1px,transparent 1px 33px);
-    mask-image:linear-gradient(transparent,#000 20% 76%,transparent);
-  }
-  .project-case {
-    --case-line:#619b82;--case-light:#baf2d6;--case-ink:#172e24;--case-dark:#0c1b14;
-    --shelf-angle:8deg;--fan:-2deg;
-    overflow:clip; margin:10px 0 0; min-width:0; position:relative; border:1px solid #3a5148;
-    background:#101b16; box-shadow:0 6px 0 #07100d,0 9px 22px #0007;
-    transition:margin-top .23s ease,border-color .23s ease,box-shadow .23s ease;
-  }
-  .project-case--workbench {
-    --case-line:#749f90;--case-light:#c2e7df;--case-ink:#1b3532;--case-dark:#0b1e19;--shelf-angle:0deg;--fan:0deg;
-  }
-  .project-case--tools {
-    --case-line:#909b69;--case-light:#dbe5b4;--case-ink:#2a331c;--case-dark:#171e12;--shelf-angle:-8deg;--fan:2deg;
-  }
-  .project-case[open], .project-case:focus-within,
-  .shelf-stage:not(:has(.project-case[open])) .project-case:first-child {
-    margin-top:0; border-color:var(--case-line); box-shadow:0 7px 0 #07100d,0 14px 29px #000a;
-  }
-  .case-summary {display:block;min-width:0;list-style:none;cursor:pointer}
-  .case-summary::-webkit-details-marker {display:none}
-  .case-summary::marker {content:""}
-  .case-summary:focus-visible {outline:2px solid #b6fbcf;outline-offset:-3px}
-  .case-media {
-    position:relative;isolation:isolate;display:block;margin:9px;height:clamp(142px,17vw,215px);
-    perspective:850px;overflow:hidden;background:#0b1912;
-  }
-  .shelf-stage:has(.project-case[open]) .project-case:not([open]):not(:focus-within) .case-media {opacity:.74}
-  .case-bed,.case-cover {position:absolute;inset:0;display:block;border:1px solid var(--case-line)}
-  .case-bed {
-    display:flex; align-items:flex-end;justify-content:flex-end;flex-direction:column;gap:5px;
-    padding:12px;color:var(--case-light);font:10px/1.4 var(--mono);letter-spacing:.12em;
-    background:repeating-linear-gradient(0deg,#83c89f12 0 1px,transparent 1px 8px),linear-gradient(145deg,#13281e,var(--case-dark));
-    box-shadow:inset 0 0 0 7px #0c1913;
-  }
-  .case-bed span:first-child {font-size:clamp(32px,5vw,64px);font-weight:680;line-height:1;letter-spacing:-.08em;color:var(--case-line)}
-  .case-cover {
-    display:grid;grid-template-columns:32px 1fr; transform-origin:left center;
-    transform:rotateY(var(--shelf-angle)) rotateZ(var(--fan)) scale(.985); transition:transform .58s cubic-bezier(.2,.7,.16,1);
-    background:var(--case-ink); box-shadow:3px 3px 0 #07100d,7px 0 14px #0008;
-  }
-  .project-case[open] .case-cover {transform:rotateY(-57deg) rotateZ(0deg)}
-  @media (hover:hover) and (pointer:fine) {
-    .project-case:not([open]) .case-summary:hover .case-cover {transform:rotateY(-12deg) rotateZ(0deg)}
-  }
-  .case-spine {
-    display:flex; align-items:center; justify-content:space-between; gap:4px; min-height:0; padding:7px 0;
-    font:10px/1.4 var(--mono); text-transform:uppercase; color:var(--case-light);
-    background:linear-gradient(90deg,#02080555,transparent 18%,transparent 77%,#02080566),var(--case-dark);
-    border-right:1px solid var(--case-line);writing-mode:vertical-rl;letter-spacing:.095em;
-  }
-  .case-front {
-    position:relative;min-width:0;display:flex;flex-direction:column;justify-content:space-between;
-    padding:9px 10px;color:var(--case-light);
-    background:radial-gradient(ellipse at 58% 60%,#bdf9d820,transparent 65%),
-      repeating-linear-gradient(90deg,#c9f3d40d 0 1px,transparent 1px 20px),
-      repeating-linear-gradient(0deg,#c9f3d40d 0 1px,transparent 1px 20px),var(--case-ink);
-  }
-  .case-cover-index,.case-cover-label {position:relative;z-index:1;font:10px/1.3 var(--mono);letter-spacing:.12em}
-  .case-cover-label {font-size:clamp(14px,2vw,24px);font-weight:700;letter-spacing:.08em}
-  .case-diagram {position:absolute;inset:29% 25% 26%;display:grid;place-items:center}
-  .case-diagram i {grid-area:1/1;border:1px solid var(--case-line);width:59%;height:68%;transform:rotate(27deg) translate(-10px,7px)}
-  .case-diagram i:nth-child(2) {transform:rotate(27deg) translate(0)}
-  .case-diagram i:nth-child(3) {transform:rotate(27deg) translate(10px,-7px)}
-  .project-case--workbench .case-diagram i {width:80%;height:57%;border-radius:50%;transform:rotate(-22deg) translateY(-10px)}
-  .project-case--workbench .case-diagram i:nth-child(2) {transform:rotate(-22deg)}
-  .project-case--workbench .case-diagram i:nth-child(3) {transform:rotate(-22deg) translateY(10px)}
-  .project-case--tools .case-diagram {grid-template-columns:repeat(3,1fr);gap:5px;align-content:center}
-  .project-case--tools .case-diagram i {grid-area:auto;width:100%;height:auto;aspect-ratio:1;transform:none;background:radial-gradient(circle,var(--case-line) 1px,transparent 1px) 0 0/6px 6px}
-  .case-ident {display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:5px 10px;padding:6px 13px 13px}
-  .case-kind {grid-column:1/-1;color:var(--shelf-soft);letter-spacing:.05em}
-  .case-title {display:block;color:#e8f4ec;font-size:clamp(17px,2.1vw,25px);font-weight:630;line-height:1.12;overflow-wrap:anywhere;}
-  .case-state {color:#c7f9d8;border:1px solid #527661;padding:5px 6px;letter-spacing:.02em}
-  .case-state-open, .project-case[open] .case-state-close {display:none}
-  .project-case[open] .case-state-open {display:inline}
-  .case-inside {display:grid;gap:10px;border-top:1px solid #365046;background:#0b1611;padding:13px;color:#c6d9cf;font-size:15px}
-  .case-inside p,.case-inside h4,.case-features {margin:0}
-  .case-inside h4 {color:#a7f3d0;margin-bottom:4px}
-  .case-features {padding-left:1.25em}
-  .case-features li::marker {color:#a7f3d0}
-  .case-source {justify-self:start;color:#b9f7d2;display:inline-flex;align-items:center;min-height:44px;max-width:100%;font-weight:600;overflow-wrap:anywhere}
-  .case-source:focus-visible {outline-offset:2px;}
-  .case-reserved {color:var(--shelf-soft)}
-  .projects-end {margin:25px 0 42px;color:#a6b9ae;font-size:14px}
-  .projects-end a {color:var(--accent)}
-  @media (min-width:860px) {
-    .shelf-stage:not(:has(.project-case[open])),
-    .shelf-stage:has(.project-case:nth-child(1)[open]) {grid-template-columns:minmax(0,1.2fr) repeat(2,minmax(0,.9fr))}
-    .shelf-stage:has(.project-case:nth-child(2)[open]) {grid-template-columns:minmax(0,.9fr) minmax(0,1.2fr) minmax(0,.9fr)}
-    .shelf-stage:has(.project-case:nth-child(3)[open]) {grid-template-columns:repeat(2,minmax(0,.9fr)) minmax(0,1.2fr)}
-  }
-  /* At desktop widths the real list is the revealed insert, not a second card. */
-  @media (min-width:1024px) {
-    .case-media {height:256px}
-    .project-case[open] .case-cover {transform:rotateY(-68deg) rotateZ(0deg)}
-    .project-case[open] .case-bed span {visibility:hidden}
-    .project-case[open] .case-inside {
-      position:absolute;inset:14px 14px auto 37%;height:246px;align-content:start;overflow:auto;
-      gap:7px;padding:10px 9px;border:1px solid #537261;background:#09150eea;letter-spacing:0;
-      font-size:14px;line-height:1.34;scrollbar-width:thin;
+  <section class="project-placeholders" aria-label="Selected projects and work in progress">
+    {
+      projectSlots.map((p) => (
+        <article class="project-slot">
+          <>
+            <div class={`slot-art slot-art--${p.shape}`} aria-hidden="true">
+              <>
+                <span class="slot-number">{p.number}</span>
+                <div class="art-object" />
+                <span class="art-label">WORK IN PROGRESS / {p.number}</span>
+              </>
+            </div>
+            <div class="slot-copy">
+              <>
+                <p class="eyebrow">{p.type}</p>
+                <h2>{p.title}</h2>
+                <p>{p.description}</p>
+                {p.href ? (
+                  <a class="slot-status slot-status--link" href={p.href}>
+                    {p.title} source on GitHub <span class="arrow-icon" aria-hidden="true" />
+                  </a>
+                ) : (
+                  <span class="slot-status">
+                    Being prepared <span class="arrow-icon" aria-hidden="true" />
+                  </span>
+                )}
+              </>
+            </div>
+          </>
+        </article>
+      ))
     }
-    .project-case[open] .case-source {outline-offset:-2px}
+  </section>
+  <p class="projects-end">
+    Find my other repositories on <a
+      href="https://github.com/po63njit">GitHub</a
+    >.
+  </p>
+</BaseLayout>
+<style>
+  .projects-intro {
+    padding: 70px 0 46px;
+    border-bottom: 1px solid var(--line);
   }
-  @media (max-width:680px) {
-    .shelf-intro {grid-template-columns:minmax(0,1fr);gap:16px}
-    .shelf-intro > p {max-width:40ch}
-    .shelf-stage {grid-template-columns:minmax(0,1fr);gap:13px}
-    .project-case,.project-case[open],.project-case:focus-within,
-    .shelf-stage:not(:has(.project-case[open])) .project-case:first-child {margin-top:0}
-    .case-media {height:145px}
-    .case-diagram {inset:24% 30% 23%}
+  .projects-intro h1 {
+    font-size: clamp(3rem, 6.7vw, 5.8rem);
+    line-height: 1.05;
+    margin: 26px 0 30px;
   }
-  @media (hover:none) { .shelf-keys {display:none} }
-  @media (prefers-reduced-motion:reduce) {
-    .project-case,.case-cover {transition:none}
+  .projects-intro h1 em {
+    font-family: Georgia, serif;
+    font-weight: 400;
+    color: var(--accent);
+  }
+  .intro-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+  }
+  .intro-bottom p {
+    max-width: 470px;
+    color: var(--muted);
+    font-size: 15px;
+    margin: 0;
+  }
+  .status {
+    font: 9px var(--mono);
+    letter-spacing: 0.15em;
+    white-space: nowrap;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .status i {
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    background: var(--accent);
+    border-radius: 50%;
+    margin-right: 8px;
+  }
+  .project-placeholders {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin: 36px 0;
+  }
+  .project-slot {
+    min-width: 0;
+  }
+  .slot-art {
+    height: 230px;
+    position: relative;
+    background: #111d20;
+    overflow: hidden;
+    border: 1px solid var(--line);
+  }
+  .slot-art--wave {
+    background: #171a20;
+  }
+  .slot-art--grid {
+    background: #211e17;
+  }
+  .slot-number {
+    position: absolute;
+    top: 18px;
+    left: 20px;
+    font: 11px var(--mono);
+    color: #839d93;
+  }
+  .art-label {
+    position: absolute;
+    left: 20px;
+    bottom: 18px;
+    font: 7px var(--mono);
+    letter-spacing: 0.16em;
+    color: #789084;
+  }
+  .art-object {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(30deg);
+    width: 84px;
+    height: 84px;
+    border: 1px solid #a7f3d055;
+    box-shadow:
+      18px -18px 0 -1px #111d20,
+      18px -18px 0 0 #a7f3d030;
+  }
+  .slot-art--wave .art-object {
+    width: 150px;
+    height: 70px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%) rotate(-25deg);
+    box-shadow:
+      0 12px 0 -1px #171a20,
+      0 13px 0 #91a9e43b,
+      0 -13px 0 -1px #171a20,
+      0 -14px 0 #91a9e43b;
+    border-color: #91a9e45c;
+  }
+  .slot-art--grid .art-object {
+    width: 110px;
+    height: 110px;
+    border: 0;
+    transform: translate(-50%, -50%);
+    box-shadow: none;
+    background: radial-gradient(circle, #d5b9845e 2px, transparent 3px);
+    background-size: 22px 22px;
+  }
+  .slot-copy {
+    padding: 24px 0;
+  }
+  .slot-copy .eyebrow {
+    font-size: 8px;
+  }
+  .slot-copy h2 {
+    font-size: 24px;
+    line-height: 1.15;
+    margin: 16px 0;
+  }
+  .slot-copy > p:not(.eyebrow) {
+    font-size: 13px;
+    color: var(--muted);
+    min-height: 66px;
+  }
+  .slot-status {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid var(--line);
+    padding-top: 18px;
+    margin-top: 26px;
+    font: 9px var(--mono);
+    color: #71887d;
+  }
+  .slot-status--link {
+    color: var(--accent);
+  }
+  .slot-status--link:hover,
+  .slot-status--link:focus-visible {
+    text-decoration: underline;
+  }
+  .projects-end {
+    font-size: 12px;
+    color: var(--muted);
+    margin: 40px 0;
+  }
+  .projects-end a {
+    color: var(--accent);
+  }
+  @media (max-width: 760px) {
+    .projects-intro {
+      padding-top: 42px;
+    }
+    .intro-bottom {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+    .project-placeholders {
+      grid-template-columns: 1fr;
+    }
+    .slot-art {
+      height: 240px;
+    }
+    .slot-copy > p:not(.eyebrow) {
+      min-height: 0;
+    }
+    .slot-copy {
+      padding-bottom: 0;
+    }
+    .slot-status {
+      margin-top: 20px;
+    }
+    .projects-intro h1 {
+      font-size: 3.1rem;
+    }
   }
 </style>

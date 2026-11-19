@@ -6,6 +6,12 @@ const posts = (await getCollection("blog"))
   .filter((p) => !p.data.draft)
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 const post = posts[0];
+// Thin, stationary echoes carry the field into the exit rail; no runtime animation.
+const tailTraces = Array.from({ length: 101 }, (_, index) => {
+  const x = index * 13 - 10;
+  const sway = Math.round(11 * Math.sin(index * 0.17) + 5 * Math.cos(index * 0.39));
+  return `M${x + sway} -9 C${x + sway * 2} 40 ${x - sway} 77 ${x - sway} 115 S${x + sway} 164 ${x + sway} 205 S${x} 247 ${x} 275`;
+});
 ---
 
 <section class="home home--orbital">
@@ -29,7 +35,11 @@ const post = posts[0];
     </div>
   </div>
 </section>
-<section class="home-bottom" aria-label="Around the site">
+<div class="home-tail" data-home-landing-tail>
+  <svg class="home-tail-art" viewBox="0 0 1280 270" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+    {tailTraces.map((trace) => <path d={trace} vector-effect="non-scaling-stroke" />)}
+  </svg>
+  <section class="home-bottom" aria-label="Around the site">
   <div class="bottom-heading">
     <span class="eyebrow">Beyond the orbit</span>
     <p>
@@ -76,7 +86,8 @@ const post = posts[0];
       </>
     </a>
   )}
-</section>
+  </section>
+</div>
 <style>
   .home {
     position: relative;
@@ -129,54 +140,97 @@ const post = posts[0];
   .mobile-break {
     display: none;
   }
+  .home-tail {
+    position: relative;
+    isolation: isolate;
+    flex: 1 0 auto;
+    margin-top: -31px;
+    pointer-events: none;
+    padding: 63px 0 36px;
+  }
+  .home-tail::before {
+    content: "";
+    position: absolute;
+    z-index: -2;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse at 50% 3%, #0b362344, transparent 59%),
+      linear-gradient(180deg, transparent, #07140e 43%, #06130d 100%);
+    mask-image: linear-gradient(to bottom, transparent, #000 24px);
+  }
+  .home-tail-art {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: #3eab65;
+    stroke-width: 0.8;
+    opacity: 0.42;
+    mask-image: linear-gradient(180deg, transparent, #000b 19%, #0006 42%, transparent 92%);
+    pointer-events: none;
+  }
+  .home-tail-art path:nth-child(5n) { stroke: #65c989; }
   .home-bottom {
+    position: relative;
+    pointer-events: auto;
     display: grid;
     grid-template-columns: 1fr 1.15fr 1.15fr;
-    border-top: 1px solid var(--line);
-    margin-top: 32px;
-    padding-top: 26px;
-    gap: 36px;
+    gap: 0;
+    border-top: 1px solid #78b19154;
+    border-bottom: 1px solid #78b19129;
+    background: linear-gradient(115deg, #0e2118df, #09160ff0 55%, #0b1b13dc);
+    box-shadow: 0 10px 30px #02080561;
+  }
+  .home-bottom::before {
+    content: "";
+    position: absolute;
+    inset: -1px 0 auto;
+    height: 1px;
+    pointer-events: none;
+    background: linear-gradient(90deg, #a2efb9b3 0, #7bd59850 13%, transparent 53%, #7bd59865);
+  }
+  .bottom-heading,
+  .bottom-link {
+    min-width: 0;
+    padding: clamp(16px, 2.2vw, 28px);
   }
   .bottom-heading .eyebrow,
   .bottom-link .eyebrow {
-    font-size: 8px;
-    letter-spacing: 0.15em;
+    font-size: 10px;
+    letter-spacing: 0.13em;
+    color: #b1efcb;
   }
   .bottom-heading p {
     font-size: 14px;
     line-height: 1.5;
-    color: #a1afa9;
-    margin-top: 12px;
+    color: #b4c7bb;
+    margin: 9px 0 0;
   }
   .bottom-link {
     display: block;
     text-decoration: none;
-    border-left: 1px solid var(--line);
-    padding-left: 36px;
+    border-left: 1px solid #78b19137;
   }
+  .bottom-link:hover, .bottom-link:focus-visible { background: #12291c; }
+  .bottom-link:focus-visible { outline-offset: -3px; }
   .bottom-link h2 {
     font-size: 19px;
-    margin: 12px 0 8px;
+    margin: 8px 0 8px;
     display: flex;
+    align-items: baseline;
     justify-content: space-between;
+    gap: 8px;
+    overflow-wrap: anywhere;
     letter-spacing: -0.02em;
   }
-  .bottom-link h2 span {
-    color: var(--accent);
-    font-weight: 300;
-  }
+  .bottom-link h2 span { color: var(--accent); }
   .bottom-link p {
-    font-size: 11px;
-    color: var(--muted);
+    font-size: 12px;
+    color: #b4c7bb;
     margin: 0;
-  }
-  @media (max-width: 800px) {
-    .home-bottom {
-      gap: 20px;
-    }
-    .bottom-link {
-      padding-left: 20px;
-    }
   }
   @media (max-width: 650px) {
     .home {
@@ -198,23 +252,14 @@ const post = posts[0];
     .home-universe {
       margin-top: 4px;
     }
-    .home-bottom {
-      grid-template-columns: 1fr;
-      margin-top: 22px;
-      padding-top: 20px;
-      gap: 22px;
-    }
+    .home-tail { margin-top: -22px; padding: 43px 0 26px; }
+    .home-tail-art { opacity: 0.28; }
+    .home-bottom { grid-template-columns: minmax(0, 1fr); }
     .bottom-heading {
       display: none;
     }
-    .bottom-link {
-      padding-left: 0;
-      border-left: 0;
-    }
-    .bottom-link + .bottom-link {
-      border-top: 1px solid var(--line);
-      padding-top: 22px;
-    }
+    .bottom-link { border-left: 0; }
+    .bottom-link + .bottom-link { border-top: 1px solid #78b19137; }
     .bottom-link h2 {
       font-size: 20px;
     }

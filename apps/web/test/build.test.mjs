@@ -347,6 +347,7 @@ test("Projects uses a local diagonal carousel around SimpleJim with a readable n
     .map((m) => read(m[1])).join("\n");
   assert.match(styles, /aspect-ratio:3\/4/);
   assert.match(styles, /touch-action:pan-y pinch-zoom/);
+  assert.match(styles, /\.gallery-card(?:\[data-astro-cid-[^\]]+\])?\{[^{}]*touch-action:pan-y pinch-zoom/);
   assert.match(styles, /\.project-gallery(?:\[data-astro-cid-[^\]]+\])?\[data-ready\][^{]*\.gallery-stage/);
 });
 

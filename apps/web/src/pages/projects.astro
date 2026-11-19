@@ -156,6 +156,8 @@ const projects = [
     box-shadow:0 19px 38px #000b,0 4px 10px #000c,inset 0 0 0 4px #a1cd9f20;
     transform:translate(-50%,0) translate3d(var(--shift-x,0%),var(--shift-y,0%),0) rotate(var(--tilt,0deg)) scale(var(--size,1));
     opacity:var(--shade,1);z-index:var(--layer,1);
+    /* The clipped card can be the first scroll container hit by a touch. */
+    touch-action:pan-y pinch-zoom;
     user-select:none;-webkit-user-select:none;
   }
   .gallery-card[aria-pressed="true"] {border-color:#b7d2a2;cursor:grab}

@@ -1,45 +1,104 @@
 ---
-import { getImage } from "astro:assets";
-import planetPack from "../assets/planet-pack.png";
-
 interface Props {
   href: string;
   label: string;
-  variant: "ice" | "forest" | "ringed" | "mechanical";
+  variant: "neptune" | "saturn" | "earth" | "jupiter";
 }
 const { href, label, variant } = Astro.props;
-const sprite = await getImage({ src: planetPack, format: "webp", quality: 90 });
-// Viewports into the user's original transparent 4 × 3 planet pack.
-// The ring extends beyond its grid cell, so keep both tips in a wider viewport.
-const viewports = {
-  ice: "362 0 362 362",
-  forest: "0 362 362 362",
-  ringed: "694 366 414 344",
-  mechanical: "724 724 362 362",
-};
-const clipId = `planet-${variant}-clip`;
 ---
-
 <a href={href} class="planet-link">
-  <svg
-    viewBox={viewports[variant]}
-    class={`planet-art planet-art--${variant}`}
-    aria-hidden="true"
-    focusable="false"
-  >
-    {variant === "ringed" && (
-      <defs>
-        <clipPath id={clipId}>
-          <path d="M752 395H1042V412H1108V495L1075 541V705H755V663H694V588L729 549Z" />
-        </clipPath>
-      </defs>
+  <span class={`planet-art planet-art--${variant}`} data-planet={variant} aria-hidden="true">
+    {variant === "saturn" && (
+      <svg class="saturn-rings saturn-rings--back" viewBox="0 0 118 100" focusable="false">
+        <g transform="rotate(-19 59 50)" fill="none">
+          <ellipse cx="59" cy="50" rx="54" ry="16.4" stroke="#b79d73" stroke-width="5.1" opacity=".48"/>
+          <ellipse cx="59" cy="50" rx="51" ry="15.5" stroke="#dfc99d" stroke-width="3.2" opacity=".78"/>
+          <ellipse cx="59" cy="50" rx="46.5" ry="14.2" stroke="#e6cc9c" stroke-width="4.1" opacity=".74"/>
+          <ellipse cx="59" cy="50" rx="42.5" ry="13" stroke="#987954" stroke-width="2.4" opacity=".63"/>
+        </g>
+      </svg>
     )}
-    <image
-      href={sprite.src}
-      width={planetPack.width}
-      height={planetPack.height}
-      clip-path={variant === "ringed" ? `url(#${clipId})` : undefined}
-    />
-  </svg>
+    <span class="solar-globe"><span class="solar-surface"></span></span>
+    {variant === "saturn" && (
+      <svg class="saturn-rings saturn-rings--front" viewBox="0 0 118 100" focusable="false">
+        <g transform="rotate(-19 59 50)" fill="none">
+          <path d="M5 50a54 16.4 0 0 0 108 0" stroke="#907653" stroke-width="5.1" opacity=".56"/>
+          <path d="M8 50a51 15.5 0 0 0 102 0" stroke="#e1c79a" stroke-width="3.2" opacity=".9"/>
+          <path d="M12.5 50a46.5 14.2 0 0 0 93 0" stroke="#ebd2a5" stroke-width="4.1" opacity=".94"/>
+          <path d="M16.5 50a42.5 13 0 0 0 85 0" stroke="#ac8c62" stroke-width="2.4" opacity=".84"/>
+        </g>
+      </svg>
+    )}
+  </span>
   <span>{label}</span>
 </a>
+
+<style>
+  /* Rotating cartographic texture, a fixed terminator, and a thin atmospheric limb.
+     This is an illustration, not an astronomical simulation. */
+  .planet-art {
+    position: relative;
+    display: block;
+    isolation: isolate;
+    --meridian: 0%;
+    --tilt: 0deg;
+    --spin: 44s;
+  }
+  .planet-art--neptune { --map: url("/images/solar-planets/neptune.webp"); --body: #265395; --limb: #64b8ff; --tilt: 18deg; --spin: 50s; --meridian: 60%; }
+  .planet-art--saturn { --map: url("/images/solar-planets/saturn.webp"); --body: #9f8657; --limb: #ffdfac; --tilt: -19deg; --spin: 44s; --meridian: 10%; }
+  .planet-art--earth { --map: url("/images/solar-planets/earth.webp"); --body: #28578c; --limb: #97dcff; --tilt: -19deg; --spin: 46s; --meridian: 29%; }
+  .planet-art--jupiter { --map: url("/images/solar-planets/jupiter.webp"); --body: #9e714b; --limb: #ffc89a; --tilt: -5deg; --spin: 38s; --meridian: 60%; }
+  .solar-globe {
+    position: absolute;
+    display: block;
+    width: 87%;
+    aspect-ratio: 1;
+    left: 50%;
+    top: 50%;
+    z-index: 1;
+    overflow: hidden;
+    border-radius: 50%;
+    isolation: isolate;
+    transform: translate(-50%, -50%);
+    background: var(--body);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--limb), transparent 71%);
+  }
+  .planet-art--saturn .solar-globe { width: 61%; }
+  .planet-art--jupiter .solar-globe { width: 93%; }
+  .solar-surface {
+    position: absolute;
+    inset: 0;
+    background-image: var(--map);
+    background-position: var(--meridian) center;
+    background-repeat: repeat-x;
+    background-size: 200% 100%;
+    transform: rotate(var(--tilt)) scale(1.10);
+  }
+  .solar-globe::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: 50%;
+    background:
+      radial-gradient(ellipse at 25% 23%, #ffffff25 0%, transparent 53%),
+      radial-gradient(ellipse at 33% 33%, transparent 37%, #0002 53%, #000a 78%, #000e 100%);
+    box-shadow: inset 1.5px 1px 2px color-mix(in srgb, var(--limb), transparent 35%),
+                inset -5px -4px 8px #010506cf;
+    pointer-events: none;
+  }
+  .saturn-rings { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .saturn-rings--front { z-index: 2; }
+  @media (prefers-reduced-motion: no-preference) {
+    :global([data-orbit-scene][data-motion]) .solar-surface {
+      animation: solar-longitude var(--spin) linear infinite;
+    }
+    :global([data-orbit-scene][data-motion="paused"]) .solar-surface,
+    :global([data-orbit-scene]:has(.planet-link:focus-visible)) .solar-surface {
+      animation-play-state: paused;
+    }
+  }
+  @keyframes solar-longitude {
+    to { background-position: calc(var(--meridian) + 200%) center; }
+  }
+</style>

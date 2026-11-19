@@ -109,15 +109,29 @@ test("Green Console plus a single reduced-motion-aware phosphor echo is homepage
   assert.doesNotMatch(styles, /animation:[^};]*phosphor-(?:wordmark|trail)[^};]*infinite/);
 });
 
-test("homepage uses four distinct planets from the supplied pack", () => {
+test("homepage uses four distinct locally hosted solar planets and the same links", () => {
   const home = read("index.html");
-  for (const variant of ["ice", "ringed", "forest", "mechanical"]) {
-    assert.equal((home.match(new RegExp(`planet-art--${variant}`, "g")) || []).length, 1);
+  const links = [["neptune", "/blog/", "Writing"], ["saturn", "/resume/", "Résumé"], ["earth", "/about/", "About"], ["jupiter", "/projects/", "Projects"]];
+  let assetBytes = 0;
+  for (const [name, href, label] of links) {
+    assert.equal((home.match(new RegExp(`data-planet="${name}"`, "g")) || []).length, 1);
+    const planetLink = [...home.matchAll(/<a[^>]*class="planet-link"[^>]*>[\s\S]*?<\/a>/g)]
+      .find((m) => m[0].includes(`data-planet="${name}"`))?.[0];
+    assert.ok(planetLink?.includes(`href="${href}"`) && planetLink.includes(`>${label}<`), name);
+    const asset = resolve(dist, `images/solar-planets/${name}.webp`);
+    const bytes = readFileSync(asset);
+    assert.equal(bytes.toString("ascii", 8, 12), "WEBP");
+    assetBytes += bytes.length;
   }
-  const sprites = [...home.matchAll(/<image[^>]+href="([^"]+planet-pack[^\"]+\.webp)"/g)];
-  assert.equal(sprites.length, 4);
-  assert.equal(new Set(sprites.map((match) => match[1])).size, 1);
-  assert.doesNotMatch(home, /earthShade|venusShade|jupiterShade/);
+  assert.ok(assetBytes < 140_000);
+  assert.match(home, /saturn-rings--back/);
+  assert.match(home, /saturn-rings--front/);
+  assert.match(home, /href="\/licenses\/solar-orbits\.txt"/);
+  assert.match(read("licenses/solar-orbits.txt"), /Solar System Scope/);
+  assert.doesNotMatch(home, /planet-pack/);
+  const styles = [...home.matchAll(/<link rel="stylesheet" href="\/([^"]+)"/g)].map((m) => read(m[1])).join("\n");
+  assert.match(styles, /prefers-reduced-motion:\s*no-preference[^{}]*\{[^{}]*\.solar-surface[^{}]*\{animation:solar-longitude/);
+  assert.match(styles, /data-motion=paused[^{}]*\.solar-surface[^{}]*\{animation-play-state:paused/);
 });
 
 test("About copy and description use the graduate-student title", () => {

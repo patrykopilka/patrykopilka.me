@@ -1,0 +1,17 @@
+Planet artwork credits — patrykopilka.me
+======================================
+
+Planet maps adapted from Solar System Scope (INOVE):
+https://www.solarsystemscope.com/textures/
+Creative Commons Attribution 4.0 International:
+https://creativecommons.org/licenses/by/4.0/
+
+Source maps: Earth Day Map and Earth Clouds, Jupiter, Saturn, Neptune.
+Changes: Earth day map composited with its cloud layer, maps resized and
+reencoded as WebP, then presented with CSS shading and decorative Saturn rings.
+
+Visual reference: Solar CSSystem by Rob DiMarzo
+https://codepen.io/robdimarzo/pen/LMOLer
+The homepage uses original integration, shading, and rings, not the Pen's
+code or its externally hosted textures. Spin speeds, tilts, scale and colors
+are illustrative, not a scientific visualization.

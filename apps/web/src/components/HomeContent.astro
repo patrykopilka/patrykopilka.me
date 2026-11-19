@@ -10,21 +10,23 @@ const post = posts[0];
 
 <section class="home home--orbital">
   <MatrixWaves />
-  <div class="home-heading">
-    <p class="eyebrow">
-      <span class="signal"></span> Computer engineering / Personal orbit
-    </p>
-    <h1>
-      Patryk Opilka<span>.</span>
-    </h1>
-    <p class="home-description">
-      Computer engineering, from the metal up.
-      <br class="mobile-break" /> A place for things I build, learn, and
-      explore.
-    </p>
-  </div>
-  <div class="home-universe">
-    <OrbitScene />
+  <div class="home-content">
+    <div class="home-heading">
+      <p class="eyebrow">
+        <span class="signal"></span> Computer engineering / Personal orbit
+      </p>
+      <h1>
+        Patryk Opilka<span>.</span>
+      </h1>
+      <p class="home-description">
+        Computer engineering, from the metal up.
+        <br class="mobile-break" /> A place for things I build, learn, and
+        explore.
+      </p>
+    </div>
+    <div class="home-universe">
+      <OrbitScene />
+    </div>
   </div>
 </section>
 <section class="home-bottom" aria-label="Around the site">
@@ -80,6 +82,11 @@ const post = posts[0];
     position: relative;
     isolation: isolate;
     padding-top: 54px;
+  }
+  .home-content,
+  .home-bottom {
+    width: min(calc(100% - 2 * var(--pad)), calc(var(--maxw) - 2 * var(--pad)));
+    margin-inline: auto;
   }
   .home-heading {
     text-align: center;

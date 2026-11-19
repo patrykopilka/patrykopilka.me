@@ -80,6 +80,10 @@ h3 {
   padding: 0 var(--pad);
   min-height: 70vh;
 }
+.container--full-bleed {
+  max-width: none;
+  padding-inline: 0;
+}
 .site-header,
 .site-footer {
   position: relative;

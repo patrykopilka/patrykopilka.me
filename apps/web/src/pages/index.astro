@@ -3,6 +3,33 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import HomeContent from "../components/HomeContent.astro";
 ---
 
-<BaseLayout title="Patryk Opilka — Computer engineering & experiments" fullBleed greenConsoleHeader>
+<BaseLayout title="Patryk Opilka — Computer engineering & experiments" description="Explore Patryk Opilka’s computer engineering portfolio, with systems projects, technical writing, a résumé, and notes on hardware and software." fullBleed greenConsoleHeader homeLanding>
   <HomeContent />
 </BaseLayout>
+
+<style is:global>
+  .home-landing {
+    /* Same hero base color as the rest of the site; green only gathers at the foot. */
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(to top, #06130d, #080d10 min(370px, 41vh));
+  }
+  .home-landing > .console-header { flex-shrink: 0; }
+  .home-landing > .container--full-bleed {
+    display: flex;
+    flex-direction: column;
+    flex: 1 0 auto;
+    min-height: 70vh;
+    width: 100%;
+  }
+  .site-footer--home {
+    width: 100%;
+    margin-top: 0;
+    border-top-color: #78b19142;
+    color: #a9c0b1;
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
+  }
+  .site-footer--home a { color: #b6ebc9; }
+</style>

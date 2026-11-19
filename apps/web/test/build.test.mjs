@@ -186,11 +186,11 @@ test("rendered portfolio and journal navigation use direct directory URLs", () =
 
 test("Projects introduces SimpleJim as an early Android prototype and links its source", () => {
   const html = read("projects/index.html");
-  const slot = [...html.matchAll(/<article\b[^>]*>[\s\S]*?<\/article>/g)]
-    .map(([card]) => card).find((card) => /<h2\b[^>]*>SimpleJim<\/h2>/.test(card));
+  const slot = [...html.matchAll(/<details\b[^>]*>[\s\S]*?<\/details>/g)]
+    .map(([card]) => card).find((card) => /class="case-title"[^>]*>SimpleJim<\/span>/.test(card));
   assert.ok(slot, "SimpleJim project card missing");
   assert.match(slot, /Early Android prototype/);
-  assert.match(slot, /offline lift log for Android.*sets, reps, and weight.*saved workout history/);
+  assert.match(slot, /offline lift log for Android[\s\S]*sets, reps, and weight[\s\S]*saved workout history/);
   assert.match(slot, /href="https:\/\/github\.com\/po63njit\/SimpleJim"/);
   assert.match(slot, /SimpleJim source on GitHub/);
   assert.doesNotMatch(slot, /Play Store|Install now|Download APK/);
@@ -238,4 +238,36 @@ test("long-form figures have accessible titles and static content", () => {
   if (process.env.BLOG_EXPECT_FIGURES === "1" || endian.includes("wire-study-title")) check(endian, ["wire-study-title", "device-study-title", "fixture-study-title"]);
   const kernel = read("s390-linux-kernel");
   if (process.env.BLOG_EXPECT_FIGURES === "1" || kernel.includes("s390-lowcore-title")) check(kernel, ["s390-lowcore-title", "s390-boot-paths-title", "s390-dat-indices-title", "s390-io-routes-title"]);
+});
+
+test("Projects has a native project-case shelf with its existing public contents and source link", () => {
+  const page = read("projects/index.html");
+  assert.match(page, /<h1[^>]*id="projects-title"[^>]*>Project\s*<em[^>]*>shelf\.<\/em>/);
+  const shelf = page.match(/<section[^>]*data-project-shelf[^>]*>[\s\S]*?<\/section>/)?.[0];
+  assert.ok(shelf);
+  const cases = [...shelf.matchAll(/<details[^>]*>[\s\S]*?<\/details>/g)].map(([html]) => html);
+  assert.equal(cases.length, 3);
+  for (const item of cases) {
+    assert.match(item, /<details[^>]*name="public-project-cases"[^>]*>\s*<summary/);
+    assert.doesNotMatch(item.match(/^<details[^>]*>/)?.[0], /\sopen(?:[\s=>])/);
+    assert.match(item, /<span[^>]*class="case-media"[^>]*aria-hidden="true"/);
+  }
+  assert.match(cases[0], /SimpleJim/);
+  assert.match(cases[0], /<ul[^>]*class="case-features"[^>]*>[\s\S]*?Record sets, reps, and weight\.[\s\S]*?Autosave workout drafts locally\.[\s\S]*?Revisit saved workout history\./);
+  assert.equal((shelf.match(/<a\s/gi) || []).length, 1);
+  assert.match(cases[0], /href="https:\/\/github\.com\/po63njit\/SimpleJim"/);
+  assert.match(cases[1], /Back on the workbench\./);
+  assert.match(cases[2], /Useful things, made carefully\./);
+  for (const item of cases.slice(1)) {
+    assert.match(item, /Being prepared/);
+    assert.doesNotMatch(item, /<ul|<a\s/);
+  }
+  assert.doesNotMatch(shelf, /codepen\.io|<iframe|polishedcrumb|<script[^>]*src="https?:/i);
+  for (const path of files.filter((p) => p !== "projects/index.html"))
+    assert.doesNotMatch(read(path), /data-project-shelf/);
+  const styles = [...page.matchAll(/<link rel="stylesheet" href="\/([^"]+)"/g)]
+    .map((m) => read(m[1])).join("\n");
+  assert.match(styles, /transform-origin:left center/);
+  assert.match(styles, /rotateY\(-68deg\)/);
+  assert.match(styles, /prefers-reduced-motion:\s*reduce/);
 });

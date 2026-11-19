@@ -14,6 +14,7 @@ test("production output has expected published pages and no review interface", (
   const articlePages = process.env.BLOG_EXPECT_ARTICLES ? process.env.BLOG_EXPECT_ARTICLES.split(",").map(slug => `blog/${slug}/index.html`) : [];
   assert.deepEqual(files.filter(path => !path.startsWith("blog/topics/")).sort(), [
     ...articlePages,
+    "404.html",
     "about/index.html",
     "blog/hello-world/index.html",
     "blog/index.html",
@@ -24,6 +25,7 @@ test("production output has expected published pages and no review interface", (
   for (const path of files) {
     const html = read(path);
     assert.equal((html.match(/<h1(?:\s|>)/g) || []).length, 1, path);
+    if (path === "404.html") continue;
     assert.doesNotMatch(
       html,
       /Private review|Choose a direction|\/explore\/|name="robots" content="noindex/,
@@ -278,6 +280,7 @@ test("sitemap is URL-only XML listing exactly the exported canonical indexable H
     assert.equal(url.origin, "https://patrykopilka.me");
     assert.ok(url.pathname.endsWith("/"), url.href);
     assert.equal(url.search + url.hash, "");
+    assert.notEqual(url.pathname, "/404/");
     assert.doesNotMatch(url.pathname, /\.mdx?(?:\/|$)|\/_astro\/|\/licenses\/|\/private\//i);
     return url.href;
   });
@@ -297,4 +300,16 @@ test("robots.txt is plain text and names the exact HTTPS sitemap", () => {
   const robots = read("robots.txt");
   assert.equal(robots, "User-agent: *\nAllow: /\n\nSitemap: https://patrykopilka.me/sitemap.xml\n");
   assert.doesNotMatch(robots, /<!doctype|<html/i);
+});
+
+test("the top-level 404 has useful links, no canonical, and cannot enter the sitemap", () => {
+  const html = read("404.html");
+  assert.match(html, /<title>Page not found — Patryk Opilka<\/title>/);
+  assert.match(html, /<h1[^>]*>Page not found\.<\/h1>/);
+  assert.match(html, /<meta name="robots" content="noindex"/);
+  assert.doesNotMatch(html, /rel="canonical"|http-equiv="refresh"|data-green-console/);
+  const main = html.match(/<main[^>]+>[\s\S]*?<\/main>/)?.[0];
+  assert.ok(main);
+  for (const href of ["/", "/blog/"]) assert.ok(main.includes(`href="${href}"`), href);
+  assert.doesNotMatch(read("sitemap.xml"), /\/404(?:\.html|\/)<\/loc>/);
 });

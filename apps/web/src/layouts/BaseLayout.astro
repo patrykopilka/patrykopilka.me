@@ -7,6 +7,7 @@ const {
   fullBleed = false,
   greenConsoleHeader = false,
   homeLanding = false,
+  notFound = false,
 } = Astro.props;
 const path = Astro.url.pathname;
 const canonical = new URL(path, Astro.site);
@@ -27,7 +28,7 @@ const links = [
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="canonical" href={canonical} />
+    {notFound ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
   </head>
   <body class:list={{ "home-landing": homeLanding }}>
     <a class="skip-link" href="#main">

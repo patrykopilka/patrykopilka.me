@@ -41,3 +41,95 @@ test("wheel consumes only while moving toward an available slot", () => {
     assert.deepEqual({ ...carouselWheel(position, delta, 3) }, { next, consume });
   }
 });
+
+function gestureFixture() {
+  class Node {
+    listeners = new Map();
+    attributes = new Map();
+    dataset = {};
+    style = { setProperty() {} };
+    offsetWidth = 200;
+    addEventListener(name, listener) { this.listeners.set(name, listener); }
+    setAttribute(name, value) { this.attributes.set(name, value); }
+    emit(name, values = {}) { this.listeners.get(name)?.({ target: this, ...values }); }
+    contains() { return false; }
+  }
+  const root = new Node();
+  const stage = new Node();
+  const count = new Node();
+  stage.captured = null;
+  stage.setPointerCapture = id => { stage.captured = id; };
+  stage.hasPointerCapture = id => stage.captured === id;
+  stage.releasePointerCapture = () => { stage.captured = null; };
+  const cards = Array.from({ length: 3 }, () => new Node());
+  const panels = Array.from({ length: 3 }, () => new Node());
+  const nodes = {
+    '[data-carousel-stage]': stage, '[data-carousel-count]': count,
+    '[data-carousel-controls]': new Node(), '[data-carousel-prev]': new Node(), '[data-carousel-next]': new Node(),
+  };
+  root.dataset.initialIndex = '1';
+  root.querySelector = selector => nodes[selector];
+  root.querySelectorAll = selector => selector === '[data-carousel-card]' ? cards : panels;
+  let time = 100;
+  Object.assign(sandbox, {
+    matchMedia: () => ({ matches: true, addEventListener() {} }),
+    document: { activeElement: null }, performance: { now: () => time }, clearTimeout,
+  });
+  sandbox.exports.setupProjectCarousel(root);
+  return {
+    root, stage, count, cards, nodes, advance: ms => { time += ms; },
+    event(type, x, y, target = stage) {
+      stage.emit(type, { pointerId: 7, pointerType: 'touch', clientX: x, clientY: y, isPrimary: true, button: 0, target });
+    },
+  };
+}
+
+test("a card losing implicit touch capture to the stage does not cancel a swipe", () => {
+  for (const [end, label] of [[82, '03 / 03'], [258, '01 / 03']]) {
+    const f = gestureFixture();
+    f.event('pointerdown', 170, 100, f.cards[1]);
+    f.event('pointermove', end > 170 ? 185 : 155, 103, f.cards[1]);
+    assert.equal(f.stage.captured, 7);
+    f.event('lostpointercapture', 155, 103, f.cards[1]); // bubbles from the former implicit owner
+    f.event('pointermove', end, 104);
+    f.event('pointerup', end, 104);
+    assert.equal(f.count.textContent, label);
+    assert.equal(f.stage.captured, null);
+    assert.equal('dragging' in f.root.dataset, false);
+    f.cards[1].emit('click'); // trailing click must not undo the swipe
+    assert.equal(f.count.textContent, label);
+  }
+});
+
+test("a true loss of stage capture cancels without changing selection", () => {
+  const f = gestureFixture();
+  f.event('pointerdown', 170, 100, f.cards[1]);
+  f.event('pointermove', 120, 102, f.cards[1]);
+  f.stage.captured = null;
+  f.event('lostpointercapture', 120, 102);
+  f.event('pointerup', 80, 102);
+  assert.equal(f.count.textContent, '02 / 03');
+  assert.equal('dragging' in f.root.dataset, false);
+});
+
+test("vertical touch movement is left to the browser, and a subsequent swipe still works", () => {
+  const f = gestureFixture();
+  f.event('pointerdown', 170, 100, f.cards[1]);
+  f.event('pointermove', 165, 128, f.cards[1]);
+  f.event('pointercancel', 165, 128);
+  assert.equal(f.stage.captured, null);
+  assert.equal(f.count.textContent, '02 / 03');
+  f.event('pointerdown', 170, 100, f.cards[1]);
+  f.event('pointermove', 80, 101, f.cards[1]);
+  f.event('pointerup', 80, 101);
+  assert.equal(f.count.textContent, '03 / 03');
+});
+
+test("a tap can select by click without switching into drag mode", () => {
+  const f = gestureFixture();
+  f.event('pointerdown', 170, 100, f.cards[0]);
+  f.event('pointerup', 170, 100, f.cards[0]);
+  f.cards[0].emit('click');
+  assert.equal(f.count.textContent, '01 / 03');
+  assert.equal(f.stage.captured, null);
+});

@@ -176,7 +176,12 @@ export function setupProjectCarousel(root: HTMLElement) {
   };
   stage.addEventListener('pointerup', event => finish(event, false));
   stage.addEventListener('pointercancel', event => finish(event, true));
-  stage.addEventListener('lostpointercapture', event => finish(event, true));
+  stage.addEventListener('lostpointercapture', (event) => {
+    // Touch starts with implicit capture on the hit card or its child. When
+    // the stage takes over, that child's loss bubbles here; the stage has not
+    // lost capture, so the gesture must continue.
+    if (event.target === stage) finish(event, true);
+  });
   stage.addEventListener('pointerleave', event => {
     if (pointer && pointer.id === event.pointerId && !pointer.dragging) pointer = undefined;
   });

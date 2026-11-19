@@ -1,0 +1,137 @@
+---
+interface Props {
+  links: { url: string; label: string }[];
+  path: string;
+}
+const { links, path } = Astro.props;
+---
+<header class="console-header" data-green-console>
+  <div class="console-effects" aria-hidden="true"></div>
+  <div class="console-inner">
+    <a href="/" class="console-brand" aria-label="Patryk Opilka, home">
+      <span class="console-symbol" aria-hidden="true">
+        <svg viewBox="0 0 24 24" focusable="false">
+          <path d="m5 7 5 5-5 5 M12 17h7" />
+        </svg>
+      </span>
+      <span class="console-wordmark">patryk<span>opilka</span><b>.</b></span>
+    </a>
+    <span class="console-context" aria-hidden="true"><b>~/</b> portfolio <b>▮</b></span>
+    <nav aria-label="Main navigation" class="console-nav">
+      {links.map((link) => (
+        <a href={link.url} aria-current={path === link.url || `${path}/` === link.url ? "page" : undefined}>
+          <span class="console-slash" aria-hidden="true">/</span>{link.label}
+        </a>
+      ))}
+    </nav>
+  </div>
+</header>
+
+<style>
+  .console-header {
+    --console-accent: #88fa9c;
+    --console-ink: #c7efcb;
+    --console-dim: #8bb298;
+    position: relative;
+    z-index: 5;
+    isolation: isolate;
+    color: var(--console-ink);
+    background: #071009;
+    border-bottom: 1px solid #398744;
+  }
+  .console-inner {
+    position: relative;
+    z-index: 1;
+    max-width: var(--maxw);
+    margin-inline: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 17px var(--pad);
+    min-height: 79px;
+  }
+  .console-brand {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 11px;
+    color: var(--console-ink);
+    font: 680 18px/1.15 var(--mono);
+    text-decoration: none;
+  }
+  .console-wordmark span { font-weight: 400; }
+  .console-wordmark b,
+  .console-context b,
+  .console-slash { color: var(--console-accent); }
+  .console-symbol {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    flex: 0 0 auto;
+    padding: 4px;
+    border: 1px solid #45634d;
+    color: var(--console-accent);
+    background: #111d12;
+  }
+  .console-symbol svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.25; }
+  .console-context { font: 11px/1.3 var(--mono); letter-spacing: .11em; color: var(--console-dim); white-space: nowrap; }
+  .console-nav { display: flex; gap: 10px; align-items: center; }
+  .console-nav a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 11px;
+    color: var(--console-ink);
+    font: 14px/1.25 var(--mono);
+    text-decoration: none;
+    white-space: nowrap;
+    background: #102015;
+    border: 1px solid #294234;
+  }
+  .console-brand:hover, .console-nav a:hover { color: var(--console-accent); }
+  .console-nav a:hover { background: #1c3626; }
+  .console-brand:focus-visible, .console-nav a:focus-visible {
+    outline: 2px solid var(--console-accent);
+    outline-offset: 2px;
+  }
+  .console-effects { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+  /* One travelling phosphor trail, no moving text, flashing, or repeating loop. */
+  @media (prefers-reduced-motion: no-preference) {
+    .console-wordmark { animation: phosphor-wordmark .8s .12s ease-out 1 both; }
+    .console-effects::before {
+      content: "";
+      position: absolute;
+      pointer-events: none;
+      inset: 11% 0 9%;
+      background:
+        linear-gradient(90deg, transparent 7%, #53c67438 20%, #7af08d35 33%, transparent 54%) 0 53% / 100% 13px no-repeat,
+        linear-gradient(90deg, transparent 10%, #55d77350 29%, transparent 54%) 0 77% / 100% 1px no-repeat;
+      animation: phosphor-trail .87s .12s ease-out 1 both;
+    }
+  }
+  @keyframes phosphor-wordmark {
+    0%, 100% { text-shadow: 0 0 transparent; }
+    21% { text-shadow: 4px 0 #95ffa06b, -5px 0 #229e4d7f, 9px 1px 9px #4ee77f50; }
+    57% { text-shadow: 2px 0 #95ffa03f, -1px 0 #229e4d38, 6px 1px 9px #4ee77f2b; }
+  }
+  @keyframes phosphor-trail {
+    0%, 100% { opacity: 0; transform: translateX(0); }
+    23% { opacity: .8; transform: translateX(-9px); }
+    63% { opacity: .36; transform: translateX(13px); }
+  }
+  @media (max-width: 850px) { .console-context { display: none; } }
+  @media (max-width: 620px) {
+    .console-inner { padding: 9px 12px; gap: 3px; justify-content: center; flex-wrap: wrap; min-height: 0; }
+    .console-brand { width: 100%; justify-content: center; min-height: 38px; font-size: 17px; }
+    .console-symbol { width: 24px; height: 24px; }
+    .console-nav { width: 100%; gap: 3px; justify-content: center; flex-wrap: wrap; }
+    .console-nav a { padding-inline: 8px; font-size: 13px; }
+  }
+  @media (max-width: 340px) {
+    .console-nav { column-gap: 2px; }
+    .console-nav a { padding-inline: 5px; }
+  }
+</style>

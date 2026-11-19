@@ -90,6 +90,25 @@ test("only the homepage opts into the full-width hero with a separate content co
     assert.doesNotMatch(read(path), /<main[^>]*container--full-bleed/);
 });
 
+test("Green Console plus a single reduced-motion-aware phosphor echo is homepage-only", () => {
+  const home = read("index.html");
+  const header = home.match(/<header[^>]*data-green-console[^>]*>[\s\S]*?<\/header>/)?.[0];
+  assert.ok(header, "homepage renders the Green Console header");
+  assert.match(header, /class="console-effects" aria-hidden="true"/);
+  assert.match(header, /aria-label="Patryk Opilka, home"/);
+  assert.equal((header.match(/class="console-wordmark"/g) || []).length, 1);
+  for (const href of ["/blog/", "/projects/", "/resume/", "/about/"])
+    assert.ok(header.includes(`href="${href}"`));
+  for (const path of files.filter((p) => p !== "index.html")) {
+    assert.match(read(path), /<header class="site-header"/);
+    assert.doesNotMatch(read(path), /data-green-console/);
+  }
+  const styles = [...home.matchAll(/<link rel="stylesheet" href="\/([^"]+)"/g)]
+    .map((m) => read(m[1])).join("\n");
+  assert.match(styles, /prefers-reduced-motion:\s*no-preference[^{]*\{\s*\.console-wordmark[^{}]*\{animation:[^{}]*phosphor-wordmark/);
+  assert.doesNotMatch(styles, /animation:[^};]*phosphor-(?:wordmark|trail)[^};]*infinite/);
+});
+
 test("homepage uses four distinct planets from the supplied pack", () => {
   const home = read("index.html");
   for (const variant of ["ice", "ringed", "forest", "mechanical"]) {

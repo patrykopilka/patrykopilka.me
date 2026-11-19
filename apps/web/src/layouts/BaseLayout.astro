@@ -1,9 +1,11 @@
 ---
 import "../styles/global.scss";
+import GreenConsoleHeader from "../components/GreenConsoleHeader.astro";
 const {
   title = "Patryk Opilka",
   description = "Computer engineering, systems, and experiments.",
   fullBleed = false,
+  greenConsoleHeader = false,
 } = Astro.props;
 const path = Astro.url.pathname;
 const canonical = new URL(path, Astro.site);
@@ -30,25 +32,27 @@ const links = [
     <a class="skip-link" href="#main">
       Skip to content
     </a>
-    <header class="site-header">
-      <a href="/" class="brand" aria-label="Patryk Opilka, home">
-        <span class="brand-mark" aria-hidden="true">
-          ◇
-        </span>{" "}
-        patryk<span class="brand-light">opilka</span>
-        <span class="brand-dot">.</span>
-      </a>
-      <nav class="site-nav" aria-label="Main navigation">
-        {links.map((link) => (
-          <a
-            href={link.url}
-            aria-current={path === link.url || `${path}/` === link.url ? "page" : undefined}
-          >
-            {link.label}
-          </a>
-        ))}
-      </nav>
-    </header>
+    {greenConsoleHeader ? <GreenConsoleHeader links={links} path={path} /> : (
+      <header class="site-header">
+        <a href="/" class="brand" aria-label="Patryk Opilka, home">
+          <span class="brand-mark" aria-hidden="true">
+            ◇
+          </span>{" "}
+          patryk<span class="brand-light">opilka</span>
+          <span class="brand-dot">.</span>
+        </a>
+        <nav class="site-nav" aria-label="Main navigation">
+          {links.map((link) => (
+            <a
+              href={link.url}
+              aria-current={path === link.url || `${path}/` === link.url ? "page" : undefined}
+            >
+              {link.label}
+            </a>
+          ))}
+        </nav>
+      </header>
+    )}
     <main id="main" class:list={["container", { "container--full-bleed": fullBleed }]}>
       <slot />
     </main>

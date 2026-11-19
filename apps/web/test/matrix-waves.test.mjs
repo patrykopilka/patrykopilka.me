@@ -120,6 +120,21 @@ test("mouse input still bends strings", () => {
   for (const s of [a, b]) s.advance(80);
   assert.notEqual(geometry(a), geometry(b));
 });
+test("mouse input reaches the outer edges of a 3440px hero after resize", () => {
+  const a = setup(), b = setup();
+  for (const s of [a, b]) {
+    s.box.left = 0;
+    s.box.width = 3440;
+    s.resize();
+    s.advance(1); s.advance(40);
+  }
+  a.home.emit("pointermove", { clientX: 3330, clientY: 450, pointerType: "mouse" });
+  a.home.emit("pointermove", { clientX: 3410, clientY: 450, pointerType: "mouse" });
+  for (const s of [a, b]) s.advance(80);
+  assert.equal(a.paths[15].d, b.paths[15].d);
+  assert.notEqual(a.paths.at(-6).d, b.paths.at(-6).d);
+});
+
 test("single-finger movement bends waves using passive touch events", () => {
   const a = setup(), b = setup();
   for (const s of [a, b]) { s.box.width = 375; s.resize(); s.advance(1); s.advance(40); }

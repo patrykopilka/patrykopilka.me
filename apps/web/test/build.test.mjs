@@ -82,6 +82,14 @@ test("homepage ships decorative static waves, no rays, and the MIT notice", () =
   assert.match(read("licenses/wodniack-waves.txt"), /Permission is hereby granted/);
 });
 
+test("only the homepage opts into the full-width hero with a separate content column", () => {
+  const home = read("index.html");
+  assert.match(home, /<main id="main" class="container container--full-bleed"/);
+  assert.ok(/data-matrix-waves[\s\S]*?<\/svg>\s*<\/div>\s*(?:<script[^>]*><\/script>\s*)?<div class="home-content"/.test(home));
+  for (const path of files.filter((p) => p !== "index.html"))
+    assert.doesNotMatch(read(path), /<main[^>]*container--full-bleed/);
+});
+
 test("homepage uses four distinct planets from the supplied pack", () => {
   const home = read("index.html");
   for (const variant of ["ice", "ringed", "forest", "mechanical"]) {

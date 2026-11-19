@@ -1,0 +1,31 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+<BaseLayout
+  title="Page not found — Patryk Opilka"
+  description="The page you requested could not be found."
+  notFound
+>
+  <section class="missing-page" aria-labelledby="missing-title">
+    <p class="eyebrow">404 / Off the map</p>
+    <h1 id="missing-title">Page not found.</h1>
+    <p>The address may have changed, or the page may no longer exist.</p>
+    <div class="recovery">
+      <a class="button button--primary" href="/">Go home</a>
+      <a class="button" href="/blog/">Browse the journal</a>
+    </div>
+  </section>
+</BaseLayout>
+<style>
+  .missing-page {
+    padding: clamp(38px, 9vw, 100px) 0;
+    max-width: 620px;
+  }
+  .missing-page h1 {
+    font-size: clamp(2.75rem, 9vw, 5.3rem);
+    line-height: 1;
+  }
+  .missing-page p:not(.eyebrow) { color: var(--muted); }
+  .recovery { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 25px; }
+  .recovery a { min-height: 44px; }
+</style>

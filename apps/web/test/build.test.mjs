@@ -273,3 +273,14 @@ test("Projects uses a local diagonal carousel around SimpleJim with a readable n
   assert.match(styles, /touch-action:pan-y pinch-zoom/);
   assert.match(styles, /\.project-gallery(?:\[data-astro-cid-[^\]]+\])?\[data-ready\][^{]*\.gallery-stage/);
 });
+
+test("Projects alone has a click-through matrix canvas and a manual motion toggle", () => {
+  const page = read("projects/index.html");
+  assert.match(page, /<div[^>]+class="project-atmosphere"[^>]+aria-hidden="true"[^>]*><canvas[^>]+data-projects-matrix/);
+  assert.match(page, /<button[^>]+data-matrix-toggle[^>]+hidden[^>]*>Pause background<\/button>/);
+  for (const path of files.filter((p) => p !== "projects/index.html"))
+    assert.doesNotMatch(read(path), /data-projects-matrix|data-matrix-toggle/);
+  const styles = [...page.matchAll(/<link rel="stylesheet" href="\/([^"]+)"/g)]
+    .map((m) => read(m[1])).join("\n");
+  assert.match(styles, /\.project-atmosphere[^{}]*\{[^{}]*position:fixed[^{}]*inset:0[^{}]*pointer-events:none/);
+});

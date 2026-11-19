@@ -12,12 +12,16 @@ const projects = [
 ---
 <BaseLayout title="Projects — Patryk Opilka" description="A workbench for software, hardware, and experiments.">
   <section class="project-gallery" data-project-carousel data-initial-index="1" aria-labelledby="projects-title">
+    <div class="project-atmosphere" aria-hidden="true"><canvas data-projects-matrix></canvas></div>
     <div class="gallery-top">
       <div>
         <p class="gallery-kicker">The workbench <span aria-hidden="true">/</span> Selected work</p>
         <h1 id="projects-title">Projects<span>.</span></h1>
       </div>
-      <p class="gallery-intro">A few things I’m building. I’ll add more as they’re ready to explore.</p>
+      <div class="gallery-meta">
+        <p class="gallery-intro">A few things I’m building. I’ll add more as they’re ready to explore.</p>
+        <button type="button" class="matrix-toggle" data-matrix-toggle hidden>Pause background</button>
+      </div>
     </div>
     <div class="gallery-stage" data-carousel-stage>
       <div class="gallery-fan" aria-label="Choose a project" role="group">
@@ -91,11 +95,34 @@ const projects = [
 
 <script>
   import { setupProjectCarousel } from "../scripts/project-carousel";
-  for (const carousel of document.querySelectorAll<HTMLElement>("[data-project-carousel]")) setupProjectCarousel(carousel);
+  import { setupProjectsMatrix } from "../scripts/projects-matrix";
+  for (const carousel of document.querySelectorAll<HTMLElement>("[data-project-carousel]")) {
+    setupProjectCarousel(carousel);
+    setupProjectsMatrix(carousel);
+  }
 </script>
 
 <style>
-  .project-gallery {color:#e8f2ed;--lime:#bcf1ca;--muted-green:#acbdb3;--mono-track:.1em;}
+  .project-gallery {isolation:isolate;position:relative;color:#e8f2ed;--lime:#bcf1ca;--muted-green:#acbdb3;--mono-track:.1em;}
+  .project-atmosphere {
+    position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;
+    background:#020704;
+  }
+  .project-atmosphere canvas {display:block;width:100%;height:100%;visibility:hidden;}
+  .project-gallery[data-matrix-ready] .project-atmosphere canvas {visibility:visible;}
+  .project-atmosphere::after {
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(180deg,#020704d9 0,#0207049e 17%,transparent 41%,#02070459 100%),
+      radial-gradient(ellipse 56% 72% at 50% 53%,#020704bd 8%,#02070475 54%,transparent 95%);
+  }
+  .gallery-meta {display:grid;justify-items:start;gap:6px;}
+  .matrix-toggle {
+    display:inline-flex;align-items:center;justify-content:center;min-height:44px;
+    padding:4px 11px;border:1px solid #547862;background:#0b1c13ed;color:#d3f6dc;
+    font:12px/1.3 var(--mono);text-align:left;
+  }
+  .matrix-toggle[hidden] {display:none;}
+  .matrix-toggle:hover {background:#173622;color:#ecfff0;}
   .gallery-top {
     display:grid;grid-template-columns:1fr minmax(220px,34ch);gap:24px;align-items:end;
     padding:clamp(30px,5vh,62px) 5px 13px;
@@ -185,7 +212,7 @@ const projects = [
   .brief-features {margin:0;padding-left:1.1em;}
   .brief-features li::marker {color:var(--lime)}
   .brief-source {display:inline-flex;align-items:center;min-height:44px;color:var(--lime);font-weight:650;}
-  .projects-end {margin:24px 0 40px;color:var(--muted-green);font-size:14px;}
+  .projects-end {isolation:isolate;position:relative;display:table;background:#06110beb;padding:4px 6px;margin:24px 0 40px;color:var(--muted-green);font-size:14px;}
   .projects-end a {color:var(--lime);}
   @media (max-width:740px) {
     .project-gallery[data-ready] .gallery-stage {--card-width:clamp(190px,48vw,280px)}
@@ -195,6 +222,7 @@ const projects = [
     .brief-body {grid-column:2;}
   }
   @media (max-width:520px) {
+    .project-atmosphere::after {background:linear-gradient(180deg,#020704e6,#02070473 30%,#02070445 66%,#020704ad),radial-gradient(ellipse at center,#02070471,transparent 82%);}
     .gallery-top {grid-template-columns:minmax(0,1fr);gap:12px;padding-inline:0;}
     .gallery-intro {font-size:15px;max-width:34ch;}
     .project-gallery[data-ready] .gallery-stage {--card-width:clamp(166px,52vw,243px);--card-top:53px;height:calc(var(--card-width) * 1.62 + var(--card-top));}

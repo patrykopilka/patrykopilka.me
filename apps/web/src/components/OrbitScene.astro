@@ -33,29 +33,29 @@ const { compact = false } = Astro.props;
   </div>
   <nav class="planet-nav" aria-label="Explore the site with orbiting planets">
     <div class="orbit-planet" data-angle="225" style="--x:-25%;--y:-24%">
-      <PlanetLink href="/blog/" label="Writing" variant="ice" /><span
+      <PlanetLink href="/blog/" label="Writing" variant="neptune" /><span
         class="planet-coordinate"
         aria-hidden="true">01 / FIELD NOTES</span>
     </div>
     <div class="orbit-planet" data-angle="315" style="--x:25%;--y:-24%">
-      <PlanetLink href="/resume/" label="Résumé" variant="ringed" /><span
+      <PlanetLink href="/resume/" label="Résumé" variant="saturn" /><span
         class="planet-coordinate"
         aria-hidden="true">02 / EXPERIENCE</span>
     </div>
     <div class="orbit-planet" data-angle="135" style="--x:-25%;--y:24%">
-      <PlanetLink href="/about/" label="About" variant="forest" /><span
+      <PlanetLink href="/about/" label="About" variant="earth" /><span
         class="planet-coordinate"
         aria-hidden="true">03 / THE HUMAN</span>
     </div>
     <div class="orbit-planet" data-angle="45" style="--x:25%;--y:24%">
-      <PlanetLink href="/projects/" label="Projects" variant="mechanical" /><span
+      <PlanetLink href="/projects/" label="Projects" variant="jupiter" /><span
         class="planet-coordinate"
         aria-hidden="true">04 / WORK IN PROGRESS</span>
     </div>
   </nav>
   <span class="core-label" aria-hidden="true">THE CORE</span>
   <div class="scene-caption">
-    <span><i></i> A small universe of ideas</span><button
+    <span><i></i> A small universe of ideas <a class="planet-credits" href="/licenses/solar-orbits.txt">Planet credits</a></span><button
       type="button"
       data-motion-toggle
       aria-pressed="false"
@@ -168,7 +168,7 @@ const { compact = false } = Astro.props;
     filter: drop-shadow(0 0 16px #a7f3d055);
     transform: scale(1.06);
   }
-  .orbit-planet :global(.planet-art--ringed) {
+  .orbit-planet :global(.planet-art--saturn) {
     width: 118px;
   }
   .planet-coordinate {
@@ -190,6 +190,8 @@ const { compact = false } = Astro.props;
     font: 10px var(--mono);
     color: var(--muted);
   }
+  .planet-credits { display: inline-block; color: #a5b5ae; margin-inline-start: 7px; text-decoration: underline; text-underline-offset: 2px; }
+  .planet-credits:hover { color: var(--accent); }
   .scene-caption i {
     display: inline-block;
     width: 5px;
@@ -223,7 +225,7 @@ const { compact = false } = Astro.props;
     width: 85px;
     height: 85px;
   }
-  .compact .orbit-planet :global(.planet-art--ringed) {
+  .compact .orbit-planet :global(.planet-art--saturn) {
     width: 105px;
   }
   .compact .cube-core {
@@ -248,8 +250,8 @@ const { compact = false } = Astro.props;
       width: 64px;
       height: 64px;
     }
-    .orbit-planet :global(.planet-art--ringed),
-    .compact .orbit-planet :global(.planet-art--ringed) {
+    .orbit-planet :global(.planet-art--saturn),
+    .compact .orbit-planet :global(.planet-art--saturn) {
       width: 79px;
     }
     .orbit-planet :global(.planet-link) {

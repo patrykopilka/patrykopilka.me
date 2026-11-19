@@ -145,6 +145,7 @@ const tailTraces = Array.from({ length: 101 }, (_, index) => {
     isolation: isolate;
     flex: 1 0 auto;
     margin-top: -31px;
+    pointer-events: none;
     padding: 63px 0 36px;
   }
   .home-tail::before {
@@ -174,6 +175,7 @@ const tailTraces = Array.from({ length: 101 }, (_, index) => {
   .home-tail-art path:nth-child(5n) { stroke: #65c989; }
   .home-bottom {
     position: relative;
+    pointer-events: auto;
     display: grid;
     grid-template-columns: 1fr 1.15fr 1.15fr;
     gap: 0;

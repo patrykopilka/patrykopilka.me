@@ -138,7 +138,9 @@ test("homepage uses four distinct locally hosted solar planets and the same link
 
 test("About copy and description use the graduate-student title", () => {
   const about = read("about/index.html");
-  assert.equal((about.match(/Computer Engineering graduate student @ NJIT/g) || []).length, 2);
+  const { meta } = headMetadata(about);
+  assert.match(meta.description, /Computer Engineering graduate student @ NJIT/);
+  assert.equal((about.split("</head>")[1].match(/Computer Engineering graduate student @ NJIT/g) || []).length, 1);
   for (const path of files) assert.doesNotMatch(read(path), /Computer Engineering student/);
 });
 
@@ -312,4 +314,113 @@ test("the top-level 404 has useful links, no canonical, and cannot enter the sit
   assert.ok(main);
   for (const href of ["/", "/blog/"]) assert.ok(main.includes(`href="${href}"`), href);
   assert.doesNotMatch(read("sitemap.xml"), /\/404(?:\.html|\/)<\/loc>/);
+});
+
+test("Projects uses a local diagonal carousel around SimpleJim with a readable no-script project list", () => {
+  const page = read("projects/index.html");
+  const gallery = page.match(/<section[^>]*data-project-carousel[^>]*>[\s\S]*?<\/section>/)?.[0];
+  assert.ok(gallery);
+  assert.match(gallery, /data-initial-index="1"/);
+  assert.match(gallery, /<h1[^>]*id="projects-title"[^>]*>Projects/);
+  const cards = [...gallery.matchAll(/<button[^>]*data-carousel-card[^>]*>[\s\S]*?<\/button>/g)].map(([html]) => html);
+  assert.equal(cards.length, 3);
+  assert.match(cards[0], /aria-controls="project-workbench" aria-pressed="false"/);
+  assert.match(cards[1], /aria-controls="project-simplejim" aria-pressed="true"/);
+  assert.match(cards[2], /aria-controls="project-tools" aria-pressed="false"/);
+  assert.equal(cards.filter(card => card.includes("RESERVED")).length, 2);
+  assert.ok(cards.every(card => card.includes('viewBox="0 0 300 400"')));
+  const articles = [...gallery.matchAll(/<article[^>]*data-carousel-panel[^>]*>[\s\S]*?<\/article>/g)].map(([html]) => html);
+  assert.equal(articles.length, 3);
+  for (const item of articles)
+    assert.doesNotMatch(item.match(/^<article[^>]*>/)?.[0], /\shidden(?:\s|=|>)/);
+  assert.match(articles[0], /Back on the workbench\./);
+  assert.match(articles[1], /Record sets, reps, and weight\.[\s\S]*Autosave workout drafts locally\.[\s\S]*Revisit saved workout history\./);
+  assert.match(articles[2], /Useful things, made carefully\./);
+  for (const item of [articles[0], articles[2]]) {
+    assert.match(item, /Being prepared/);
+    assert.doesNotMatch(item, /<ul|<a\s/);
+  }
+  assert.doesNotMatch(gallery, /codepen\.io|<iframe|project-case|polishedcrumb|<script[^>]*src="https?:/i);
+  for (const path of files.filter((p) => p !== "projects/index.html"))
+    assert.doesNotMatch(read(path), /data-project-carousel/);
+  const styles = [...page.matchAll(/<link rel="stylesheet" href="\/([^"]+)"/g)]
+    .map((m) => read(m[1])).join("\n");
+  assert.match(styles, /aspect-ratio:3\/4/);
+  assert.match(styles, /touch-action:pan-y pinch-zoom/);
+  assert.match(styles, /\.project-gallery(?:\[data-astro-cid-[^\]]+\])?\[data-ready\][^{]*\.gallery-stage/);
+});
+
+test("Projects alone has a click-through matrix canvas and a manual motion toggle", () => {
+  const page = read("projects/index.html");
+  assert.match(page, /<div[^>]+class="project-atmosphere"[^>]+aria-hidden="true"[^>]*><canvas[^>]+data-projects-matrix/);
+  assert.match(page, /<button[^>]+data-matrix-toggle[^>]+hidden[^>]*>Pause background<\/button>/);
+  for (const path of files.filter((p) => p !== "projects/index.html"))
+    assert.doesNotMatch(read(path), /data-projects-matrix|data-matrix-toggle/);
+  const styles = [...page.matchAll(/<link rel="stylesheet" href="\/([^"]+)"/g)]
+    .map((m) => read(m[1])).join("\n");
+  assert.match(styles, /\.project-atmosphere[^{}]*\{[^{}]*position:fixed[^{}]*inset:0[^{}]*pointer-events:none/);
+});
+
+function decodeHtmlText(value) {
+  return value.replace(/&(?:#(\d+)|#x([0-9a-f]+)|(amp|lt|gt|quot|apos));/gi, (_, decimal, hex, name) =>
+    decimal ? String.fromCodePoint(Number(decimal)) : hex ? String.fromCodePoint(Number.parseInt(hex, 16)) :
+      ({ amp: "&", lt: "<", gt: ">", quot: '"', apos: "'" })[name.toLowerCase()]);
+}
+
+function headMetadata(html) {
+  const head = html.match(/<head>([\s\S]*?)<\/head>/)?.[1];
+  assert.ok(head);
+  const entries = [...head.matchAll(/<meta (?:name|property)="([^"]+)" content="([^"]*)"/g)];
+  assert.equal(new Set(entries.map(([, name]) => name)).size, entries.length);
+  return { head, meta: Object.fromEntries(entries.map(([, name, value]) => [name, value])) };
+}
+
+test("public pages have distinct search descriptions and matching text-only link metadata", () => {
+  const descriptions = new Set();
+  for (const path of files) {
+    const { head, meta } = headMetadata(read(path));
+    if (path === "404.html") {
+      assert.equal(meta.robots, "noindex");
+      assert.doesNotMatch(head, /<link rel="canonical"|property="og:|name="twitter:|application\/ld\+json/);
+      continue;
+    }
+    const title = decodeHtmlText(head.match(/<title>([\s\S]*?)<\/title>/)?.[1] ?? "");
+    assert.ok(meta.description && !descriptions.has(meta.description), path);
+    descriptions.add(meta.description);
+    assert.ok(title, path);
+    assert.equal(decodeHtmlText(meta["og:title"]), title, path);
+    assert.equal(decodeHtmlText(meta["twitter:title"]), title, path);
+    assert.equal(meta["og:description"], meta.description, path);
+    assert.equal(meta["twitter:description"], meta.description, path);
+    assert.equal(meta["og:url"], head.match(/rel="canonical" href="([^"]+)"/)?.[1], path);
+    assert.equal(meta["og:site_name"], "Patryk Opilka", path);
+    assert.equal(meta["twitter:card"], "summary", path);
+    assert.ok(!meta["og:image"] && !meta["twitter:image"], path);
+  }
+});
+
+test("BlogPosting metadata matches the public article headline, author, publication date, and canonical URL", () => {
+  for (const path of files) {
+    const html = read(path);
+    const { head, meta } = headMetadata(html);
+    const declarations = [...head.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
+    const article = /^blog\/[^/]+\/index\.html$/.test(path);
+    assert.equal(declarations.length, article ? 1 : 0, path);
+    assert.equal(meta["og:type"], path === "404.html" ? undefined : article ? "article" : "website", path);
+    if (!article) continue;
+    const schema = JSON.parse(declarations[0][1]);
+    const visibleHeadline = html.match(/<h1(?:\s[^>]*)?>([\s\S]*?)<\/h1>/)?.[1];
+    assert.ok(visibleHeadline, path);
+    assert.equal(schema["@context"], "https://schema.org");
+    assert.equal(schema["@type"], "BlogPosting");
+    assert.equal(schema.headline, decodeHtmlText(visibleHeadline.replace(/<[^>]+>/g, "")), path);
+    assert.equal(schema.description, decodeHtmlText(meta.description), path);
+    assert.match(html, /BY<\/span>\s*<span>Patryk Opilka<\/span>/);
+    assert.deepEqual(schema.author, { "@type": "Person", name: "Patryk Opilka", url: "https://patrykopilka.me/about/" });
+    assert.equal(schema.datePublished, html.match(/<time datetime="([^"]+)"/)?.[1], path);
+    assert.equal(meta["article:published_time"], schema.datePublished, path);
+    assert.equal(schema.mainEntityOfPage["@id"], meta["og:url"], path);
+    assert.equal(schema.dateModified, undefined);
+    assert.equal(schema.image, undefined);
+  }
 });

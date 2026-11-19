@@ -1,7 +1,27 @@
 ---
 import "../styles/ledger-blog.css";
-const { title = "Journal — Patryk Opilka", description = "Independent technical writing about computers, from memory bytes to systems boundaries." } = Astro.props;
+import ShareMetadata from "../components/seo/ShareMetadata.astro";
+interface Props {
+  title?: string;
+  description?: string;
+  article?: { headline: string; published: string; author: string };
+}
+const {
+  title = "Journal — Patryk Opilka",
+  description = "Patryk Opilka’s independent technical journal on byte order, Linux on s390x, and the boundaries between hardware and software.",
+  article,
+} = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+// Serialize only existing visible publication facts, escaping HTML script delimiters.
+const articleData = article ? JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: article.headline,
+  description,
+  author: { "@type": "Person", name: article.author, url: new URL("/about/", canonical).href },
+  datePublished: article.published,
+  mainEntityOfPage: { "@id": canonical.href },
+}).replace(/</g, "\\u003c") : undefined;
 const links = [{url:"/blog/",label:"Journal"},{url:"/",label:"Portfolio"},{url:"/projects/",label:"Projects"},{url:"/resume/",label:"Résumé"},{url:"/about/",label:"About"}];
 ---
 <!doctype html>
@@ -12,6 +32,8 @@ const links = [{url:"/blog/",label:"Journal"},{url:"/",label:"Portfolio"},{url:"
     <meta name="color-scheme" content="light" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <ShareMetadata {title} {description} {canonical} published={article?.published} />
+    {articleData && <script type="application/ld+json" set:html={articleData} />}
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="stylesheet" href="/blog-assets/fonts/fonts.css" />

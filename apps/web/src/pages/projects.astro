@@ -1,263 +1,234 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-const projectSlots = [
-  {
-    number: "01",
-    type: "Early Android prototype",
-    title: "SimpleJim",
-    description:
-      "An offline lift log for Android. Record sets, reps, and weight, then revisit saved workout history.",
-    href: "https://github.com/po63njit/SimpleJim",
-    shape: "cube",
-  },
-  {
-    number: "02",
-    type: "Hardware & experiments",
-    title: "Back on the workbench.",
-    description:
-      "A place for experiments, prototypes, and lessons from making things work.",
-    shape: "wave",
-  },
-  {
-    number: "03",
-    type: "Tools & everyday problems",
-    title: "Useful things, made carefully.",
-    description:
-      "More soon. For now, this is a deliberately quiet corner of the site.",
-    shape: "grid",
-  },
+const projects = [
+  { index: '01', id: 'workbench', name: 'Back on the workbench.', label: 'Hardware / Experiments', eyebrow: 'Hardware & experiments',
+    copy: 'A place for experiments, prototypes, and lessons from making things work.', bullets: [] },
+  { index: '02', id: 'simplejim', name: 'SimpleJim', label: 'Android / Offline', eyebrow: 'Early Android prototype',
+    copy: 'An offline lift log for Android.', bullets: ['Record sets, reps, and weight.', 'Autosave workout drafts locally.', 'Revisit saved workout history.'],
+    href: 'https://github.com/po63njit/SimpleJim' },
+  { index: '03', id: 'tools', name: 'Useful things, made carefully.', label: 'Tools / Everyday', eyebrow: 'Tools & everyday problems',
+    copy: 'More soon. For now, this is a deliberately quiet corner of the site.', bullets: [] },
 ];
 ---
-
-<BaseLayout
-  title="Projects — Patryk Opilka"
-  description="A workbench for software, hardware, and experiments."
->
-  <section class="projects-intro">
-    <p class="eyebrow">The workbench / Selected work</p><h1>
-      Good work takes<br /><em>a little tending.</em>
-    </h1><div class="intro-bottom">
-      <p>
-        A few things I’m building. I’ll add more as they’re ready to explore.
-      </p><span class="status"><i></i> IN PROGRESS</span>
+<BaseLayout title="Projects — Patryk Opilka" description="Browse Patryk Opilka’s engineering projects, including SimpleJim, an offline Android strength-training prototype with local workout history.">
+  <section class="project-gallery" data-project-carousel data-initial-index="1" aria-labelledby="projects-title">
+    <div class="project-atmosphere" aria-hidden="true"><canvas data-projects-matrix></canvas></div>
+    <div class="gallery-top">
+      <div>
+        <p class="gallery-kicker">The workbench <span aria-hidden="true">/</span> Selected work</p>
+        <h1 id="projects-title">Projects<span>.</span></h1>
+      </div>
+      <div class="gallery-meta">
+        <p class="gallery-intro">A few things I’m building. I’ll add more as they’re ready to explore.</p>
+        <button type="button" class="matrix-toggle" data-matrix-toggle hidden>Pause background</button>
+      </div>
     </div>
-  </section>
-  <section class="project-placeholders" aria-label="Selected projects and work in progress">
-    {
-      projectSlots.map((p) => (
-        <article class="project-slot">
-          <>
-            <div class={`slot-art slot-art--${p.shape}`} aria-hidden="true">
-              <>
-                <span class="slot-number">{p.number}</span>
-                <div class="art-object" />
-                <span class="art-label">WORK IN PROGRESS / {p.number}</span>
-              </>
-            </div>
-            <div class="slot-copy">
-              <>
-                <p class="eyebrow">{p.type}</p>
-                <h2>{p.title}</h2>
-                <p>{p.description}</p>
-                {p.href ? (
-                  <a class="slot-status slot-status--link" href={p.href}>
-                    {p.title} source on GitHub <span class="arrow-icon" aria-hidden="true" />
-                  </a>
+    <div class="gallery-stage" data-carousel-stage>
+      <div class="gallery-fan" aria-label="Choose a project" role="group">
+        {projects.map((project, index) => (
+          <button type="button" class={`gallery-card gallery-card--${project.id}`} data-carousel-card data-index={index} aria-controls={`project-${project.id}`} aria-pressed={index === 1}>
+            <span class="card-art" aria-hidden="true">
+              <svg viewBox="0 0 300 400" fill="none" stroke="currentColor" role="presentation" focusable="false">
+                {project.id === 'simplejim' ? (
+                  <g>
+                    <path d="M37 200h226M150 53v292M65 115h170v170H65z" opacity=".36"/>
+                    <circle cx="150" cy="200" r="80" opacity=".42"/><circle cx="150" cy="200" r="103" stroke-dasharray="1 7" opacity=".71"/>
+                    <path d="M81 218h138M81 182h138m-113 17h88" stroke-width="7"/>
+                    <path d="M94 160v80m14-69v58m84-58v58m14-69v80" stroke-width="9" stroke-linecap="square"/>
+                    <path d="M60 285h45m-45 8h15m150-178h15m-15-8h15" opacity=".78"/>
+                  </g>
+                ) : project.id === 'workbench' ? (
+                  <g stroke-width="1.4">
+                    <path d="M42 114h216m-216 57h216m-216 57h216m-216 57h216M64 92v205m42-205v205m44-205v205m44-205v205m42-205v205" opacity=".29"/>
+                    <path d="M43 202h37l12-73 24 148 23-110 18 37h18l13-30 17 54 12-26h41" stroke-width="2.5"/>
+                    <ellipse cx="150" cy="197" rx="103" ry="85" stroke-dasharray="2 7" opacity=".65"/>
+                  </g>
                 ) : (
-                  <span class="slot-status">
-                    Being prepared <span class="arrow-icon" aria-hidden="true" />
-                  </span>
+                  <g>
+                    <path d="M150 101 235 151v99l-85 49-85-49v-99l85-50Zm0 0v99m85-49-85 49-85-49m85 49v99" stroke-width="2.5"/>
+                    <path d="m150 77 106 61v124l-106 61-106-61V138l106-61Z" stroke-dasharray="2 7"/>
+                    <path d="m150 101 85 149M65 250l85-149m85 50-170 99m0-99 170 99" opacity=".35"/>
+                  </g>
                 )}
+              </svg>
+            </span>
+            <span class="card-index" aria-hidden="true">{project.index}</span>
+            <span class="card-status" aria-hidden="true">{project.href ? "PROTOTYPE" : "RESERVED"}</span>
+            <span class="card-caption"><small>{project.label}</small><strong>{project.name}</strong></span>
+          </button>
+        ))}
+      </div>
+    </div>
+    <div class="gallery-controls" data-carousel-controls hidden>
+      <button type="button" data-carousel-prev aria-label="Previous project">←</button>
+      <span class="gallery-count" data-carousel-count aria-live="polite" aria-atomic="true">02 / 03</span>
+      <button type="button" data-carousel-next aria-label="Next project">→</button>
+      <p><span>Drag or swipe</span><span class="gallery-wheel">Scroll or use ← →</span></p>
+    </div>
+    <div class="gallery-details">
+      {projects.map((project) => (
+        <article class="project-brief" id={`project-${project.id}`} data-carousel-panel aria-labelledby={`project-title-${project.id}`}>
+          <span class="brief-index" aria-hidden="true">{project.index}</span>
+          <div>
+            <p class="brief-type">{project.eyebrow}</p>
+            <h2 id={`project-title-${project.id}`}>{project.name}</h2>
+            <p class="brief-description">{project.copy}</p>
+          </div>
+          <div class="brief-body">
+            {project.href ? (
+              <>
+                <ul class="brief-features" aria-label="Features">
+                  {project.bullets.map(bullet => <li>{bullet}</li>)}
+                </ul>
+                <a class="brief-source" href={project.href}>SimpleJim source on GitHub</a>
               </>
-            </div>
-          </>
+            ) : (
+              <span class="brief-reserved">Being prepared <span aria-hidden="true">/</span> Reserved</span>
+            )}
+          </div>
         </article>
-      ))
-    }
+      ))}
+    </div>
+    <p class="projects-end">Find my other repositories on <a href="https://github.com/po63njit">GitHub</a>.</p>
   </section>
-  <p class="projects-end">
-    Find my other repositories on <a
-      href="https://github.com/po63njit">GitHub</a
-    >.
-  </p>
 </BaseLayout>
+
+<script>
+  import { setupProjectCarousel } from "../scripts/project-carousel";
+  import { setupProjectsMatrix } from "../scripts/projects-matrix";
+  for (const carousel of document.querySelectorAll<HTMLElement>("[data-project-carousel]")) {
+    setupProjectCarousel(carousel);
+    setupProjectsMatrix(carousel);
+  }
+</script>
+
 <style>
-  .projects-intro {
-    padding: 70px 0 46px;
-    border-bottom: 1px solid var(--line);
+  .project-gallery {isolation:isolate;position:relative;color:#e8f2ed;--lime:#bcf1ca;--muted-green:#acbdb3;--mono-track:.1em;}
+  .project-atmosphere {
+    position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;
+    background:#020704;
   }
-  .projects-intro h1 {
-    font-size: clamp(3rem, 6.7vw, 5.8rem);
-    line-height: 1.05;
-    margin: 26px 0 30px;
+  .project-atmosphere canvas {display:block;width:100%;height:100%;visibility:hidden;}
+  .project-gallery[data-matrix-ready] .project-atmosphere canvas {visibility:visible;}
+  .project-atmosphere::after {
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(180deg,#020704d9 0,#0207049e 17%,transparent 41%,#02070459 100%),
+      radial-gradient(ellipse 56% 72% at 50% 53%,#020704bd 8%,#02070475 54%,transparent 95%);
   }
-  .projects-intro h1 em {
-    font-family: Georgia, serif;
-    font-weight: 400;
-    color: var(--accent);
+  .gallery-meta {display:grid;justify-items:start;gap:6px;}
+  .matrix-toggle {
+    display:inline-flex;align-items:center;justify-content:center;min-height:44px;
+    padding:4px 11px;border:1px solid #547862;background:#0b1c13ed;color:#d3f6dc;
+    font:12px/1.3 var(--mono);text-align:left;
   }
-  .intro-bottom {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    gap: 24px;
+  .matrix-toggle[hidden] {display:none;}
+  .matrix-toggle:hover {background:#173622;color:#ecfff0;}
+  .gallery-top {
+    display:grid;grid-template-columns:1fr minmax(220px,34ch);gap:24px;align-items:end;
+    padding:clamp(30px,5vh,62px) 5px 13px;
   }
-  .intro-bottom p {
-    max-width: 470px;
-    color: var(--muted);
-    font-size: 15px;
-    margin: 0;
+  .gallery-kicker {color:var(--muted-green);font:12px/1.4 var(--mono);letter-spacing:var(--mono-track);text-transform:uppercase;margin:0 0 13px}
+  .gallery-kicker span {color:#8ad3a6;margin-inline:3px;}
+  .gallery-top h1 {font-size:clamp(3.15rem,7vw,5.45rem);line-height:.99;margin:0;font-weight:520}
+  .gallery-top h1 span {color:#a3e9b5}
+  .gallery-intro {font-size:16px;color:var(--muted-green);margin:0 0 4px;line-height:1.55}
+  .gallery-stage,.gallery-controls {display:none}
+  .project-gallery[data-ready] .gallery-stage {
+    --card-width:clamp(230px,27vw,345px);--card-top:clamp(60px,8vw,100px);
+    display:block;position:relative;isolation:isolate;
+    height:calc(var(--card-width) * 1.62 + var(--card-top));
+    overflow:hidden;touch-action:pan-y pinch-zoom;
+    background:radial-gradient(ellipse 77% 66% at 50% 51%,#20402b40,transparent 76%);
   }
-  .status {
-    font: 9px var(--mono);
-    letter-spacing: 0.15em;
-    white-space: nowrap;
-    color: var(--accent);
-    margin-bottom: 4px;
+  .gallery-stage:before {
+    content:"";position:absolute;inset:68% 2% 3%;z-index:-1;pointer-events:none;
+    background:radial-gradient(ellipse at 49% 10%,#0307048c,transparent 69%),repeating-linear-gradient(0deg,#85c29217 0 1px,transparent 1px 19px);
+    mask-image:radial-gradient(ellipse,#000 0,transparent 67%);
+    transform:perspective(260px) rotateX(33deg);
   }
-  .status i {
-    display: inline-block;
-    width: 5px;
-    height: 5px;
-    background: var(--accent);
-    border-radius: 50%;
-    margin-right: 8px;
+  .gallery-fan {position:absolute;inset:0;isolation:isolate}
+  .gallery-card {
+    --cover-a:#426646;--cover-b:#123421;--cover-c:#102719;--line-art:#a3c786;--cover-ink:#ecf4dd;
+    position:absolute;top:var(--card-top);left:50%;width:var(--card-width);aspect-ratio:3/4;
+    display:block;overflow:hidden;isolation:isolate;
+    padding:0;text-align:left;border:1px solid #77977e;border-radius:8px;color:var(--cover-ink);cursor:grab;
+    background:linear-gradient(136deg,var(--cover-a),var(--cover-b) 62%,var(--cover-c));
+    box-shadow:0 19px 38px #000b,0 4px 10px #000c,inset 0 0 0 4px #a1cd9f20;
+    transform:translate(-50%,0) translate3d(var(--shift-x,0%),var(--shift-y,0%),0) rotate(var(--tilt,0deg)) scale(var(--size,1));
+    opacity:var(--shade,1);z-index:var(--layer,1);
+    user-select:none;-webkit-user-select:none;
   }
-  .project-placeholders {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-    margin: 36px 0;
+  .gallery-card[aria-pressed="true"] {border-color:#b7d2a2;cursor:grab}
+  .gallery-card:focus-visible {outline:3px solid #ddffe6;outline-offset:-7px;opacity:1;}
+  .gallery-card--workbench {--cover-a:#496660;--cover-b:#1c3430;--cover-c:#102520;--line-art:#aed7b5;--cover-ink:#e5f0df;}
+  .gallery-card--tools {--cover-a:#64684a;--cover-b:#303a27;--cover-c:#1e281a;--line-art:#c8d3a0;--cover-ink:#edf1d6;}
+  .gallery-card::before,.gallery-card::after {
+    content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
   }
-  .project-slot {
-    min-width: 0;
+  .gallery-card::before {
+    background:repeating-linear-gradient(90deg,#defbd518 0 1px,transparent 1px 21px),repeating-linear-gradient(0deg,#eafdd619 0 1px,transparent 1px 21px);
+    mask-image:radial-gradient(ellipse at 58% 59%,#000,transparent 76%);
   }
-  .slot-art {
-    height: 230px;
-    position: relative;
-    background: #111d20;
-    overflow: hidden;
-    border: 1px solid var(--line);
+  .gallery-card::after {background:linear-gradient(0deg,#020a06e8,transparent 46%);z-index:1}
+  .card-art {position:absolute;inset:0;color:var(--line-art);pointer-events:none;z-index:0}
+  .card-art svg {width:100%;height:100%;display:block;}
+  .card-index {
+    position:absolute;top:7%;left:7.5%;z-index:2;
+    font:clamp(62px,8vw,112px)/.76 Georgia,serif;letter-spacing:-.096em;
+    text-shadow:0 2px 12px #0005;color:var(--cover-ink);
   }
-  .slot-art--wave {
-    background: #171a20;
+  .card-status {
+    position:absolute;z-index:2;right:7%;top:8%;font:clamp(9px,1vw,11px)/1.2 var(--mono);
+    letter-spacing:.08em;padding:4px 5px;border:1px solid #d5edd57a;color:#eff8eb;background:#132716ad;
   }
-  .slot-art--grid {
-    background: #211e17;
+  .card-caption {position:absolute;z-index:2;inset:auto 7% 7.5%;display:grid;gap:7px;pointer-events:none}
+  .card-caption small {font:clamp(10px,1.2vw,12px)/1.3 var(--mono);letter-spacing:.11em;text-transform:uppercase;}
+  .card-caption strong {font:500 clamp(25px,3.4vw,44px)/1.04 Georgia,serif;letter-spacing:-.035em;overflow-wrap:anywhere;text-wrap:balance;}
+  .project-gallery[data-dragging] .gallery-stage,.project-gallery[data-dragging] .gallery-card {cursor:grabbing;}
+  .project-gallery[data-ready] .gallery-controls {
+    display:grid;grid-template-columns:auto auto auto minmax(0,1fr);align-items:center;justify-content:center;gap:6px;max-width:440px;margin:-36px auto 23px;position:relative;z-index:1;
   }
-  .slot-number {
-    position: absolute;
-    top: 18px;
-    left: 20px;
-    font: 11px var(--mono);
-    color: #839d93;
+  .gallery-controls button {
+    min-width:44px;min-height:44px;padding:2px 12px;display:grid;place-items:center;
+    border:1px solid #55745e;background:#101e16;color:#d0f3d2;font-size:19px;cursor:pointer;
   }
-  .art-label {
-    position: absolute;
-    left: 20px;
-    bottom: 18px;
-    font: 7px var(--mono);
-    letter-spacing: 0.16em;
-    color: #789084;
+  .gallery-controls button:not(:disabled):hover {background:#1a3824;}
+  .gallery-controls button:disabled {opacity:.58;cursor:default}
+  .gallery-count {padding-inline:6px;color:var(--lime);font:13px/1.4 var(--mono);white-space:nowrap}
+  .gallery-controls p {display:grid;gap:0;margin:0 0 0 7px;color:var(--muted-green);font-size:12px;line-height:1.45}
+  .gallery-details {display:grid;gap:16px;margin:20px 0 0}
+  .project-brief {
+    display:grid;grid-template-columns:auto minmax(0,1fr) minmax(180px,1.05fr);align-items:start;gap:16px 22px;
+    padding:clamp(14px,3vw,26px);border:1px solid #395645;border-top:2px solid #698c71;
+    background:#0d1913;box-shadow:0 6px 12px #0003;
   }
-  .art-object {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) rotate(30deg);
-    width: 84px;
-    height: 84px;
-    border: 1px solid #a7f3d055;
-    box-shadow:
-      18px -18px 0 -1px #111d20,
-      18px -18px 0 0 #a7f3d030;
+  .project-brief[hidden] {display:none;}
+  .brief-index {display:block;color:#bfebc3;font:26px/1.06 Georgia,serif;letter-spacing:-.06em;}
+  .brief-type,.brief-reserved {color:var(--lime);font:11px/1.4 var(--mono);text-transform:uppercase;letter-spacing:var(--mono-track);margin:0 0 5px;}
+  .brief-type {color:#a9c5b1;}
+  .project-brief h2 {font-size:clamp(1.32rem,3vw,2rem);margin:0 0 6px;line-height:1.12;}
+  .brief-body {color:#c1d4c7;}
+  .brief-description {color:#c1d4c7;margin:0;}
+  .brief-features {margin:0;padding-left:1.1em;}
+  .brief-features li::marker {color:var(--lime)}
+  .brief-source {display:inline-flex;align-items:center;min-height:44px;color:var(--lime);font-weight:650;}
+  .projects-end {isolation:isolate;position:relative;display:table;background:#06110beb;padding:4px 6px;margin:24px 0 40px;color:var(--muted-green);font-size:14px;}
+  .projects-end a {color:var(--lime);}
+  @media (max-width:740px) {
+    .project-gallery[data-ready] .gallery-stage {--card-width:clamp(190px,48vw,280px)}
+    .gallery-card {border-radius:6px;}
+    .card-index {font-size:clamp(55px,13vw,85px);}
+    .project-brief {column-gap:12px;grid-template-columns:auto minmax(0,1fr);}
+    .brief-body {grid-column:2;}
   }
-  .slot-art--wave .art-object {
-    width: 150px;
-    height: 70px;
-    border-radius: 50%;
-    transform: translate(-50%, -50%) rotate(-25deg);
-    box-shadow:
-      0 12px 0 -1px #171a20,
-      0 13px 0 #91a9e43b,
-      0 -13px 0 -1px #171a20,
-      0 -14px 0 #91a9e43b;
-    border-color: #91a9e45c;
-  }
-  .slot-art--grid .art-object {
-    width: 110px;
-    height: 110px;
-    border: 0;
-    transform: translate(-50%, -50%);
-    box-shadow: none;
-    background: radial-gradient(circle, #d5b9845e 2px, transparent 3px);
-    background-size: 22px 22px;
-  }
-  .slot-copy {
-    padding: 24px 0;
-  }
-  .slot-copy .eyebrow {
-    font-size: 8px;
-  }
-  .slot-copy h2 {
-    font-size: 24px;
-    line-height: 1.15;
-    margin: 16px 0;
-  }
-  .slot-copy > p:not(.eyebrow) {
-    font-size: 13px;
-    color: var(--muted);
-    min-height: 66px;
-  }
-  .slot-status {
-    display: flex;
-    justify-content: space-between;
-    border-top: 1px solid var(--line);
-    padding-top: 18px;
-    margin-top: 26px;
-    font: 9px var(--mono);
-    color: #71887d;
-  }
-  .slot-status--link {
-    color: var(--accent);
-  }
-  .slot-status--link:hover,
-  .slot-status--link:focus-visible {
-    text-decoration: underline;
-  }
-  .projects-end {
-    font-size: 12px;
-    color: var(--muted);
-    margin: 40px 0;
-  }
-  .projects-end a {
-    color: var(--accent);
-  }
-  @media (max-width: 760px) {
-    .projects-intro {
-      padding-top: 42px;
-    }
-    .intro-bottom {
-      align-items: flex-start;
-      flex-direction: column;
-    }
-    .project-placeholders {
-      grid-template-columns: 1fr;
-    }
-    .slot-art {
-      height: 240px;
-    }
-    .slot-copy > p:not(.eyebrow) {
-      min-height: 0;
-    }
-    .slot-copy {
-      padding-bottom: 0;
-    }
-    .slot-status {
-      margin-top: 20px;
-    }
-    .projects-intro h1 {
-      font-size: 3.1rem;
-    }
+  @media (max-width:520px) {
+    .project-atmosphere::after {background:linear-gradient(180deg,#020704e6,#02070473 30%,#02070445 66%,#020704ad),radial-gradient(ellipse at center,#02070471,transparent 82%);}
+    .gallery-top {grid-template-columns:minmax(0,1fr);gap:12px;padding-inline:0;}
+    .gallery-intro {font-size:15px;max-width:34ch;}
+    .project-gallery[data-ready] .gallery-stage {--card-width:clamp(166px,52vw,243px);--card-top:53px;height:calc(var(--card-width) * 1.62 + var(--card-top));}
+    .project-gallery[data-ready] .gallery-controls {margin:-22px auto 18px;justify-content:start;max-width:max-content;}
+    .gallery-wheel {display:none;}
+    .brief-features,.brief-description {font-size:15px;}
+    .gallery-count {padding-inline:3px;}
   }
 </style>

@@ -239,3 +239,28 @@ test("long-form figures have accessible titles and static content", () => {
   const kernel = read("s390-linux-kernel");
   if (process.env.BLOG_EXPECT_FIGURES === "1" || kernel.includes("s390-lowcore-title")) check(kernel, ["s390-lowcore-title", "s390-boot-paths-title", "s390-dat-indices-title", "s390-io-routes-title"]);
 });
+
+test("homepage alone integrates the footer with a static wave-tail field", () => {
+  const home = read("index.html");
+  assert.match(home, /<body(?: [^>]*)? class="home-landing"/);
+  const tail = home.match(/<div[^>]*data-home-landing-tail[^>]*>[\s\S]*?<\/section>\s*<\/div>/)?.[0];
+  assert.ok(tail);
+  const decoration = tail.match(/<svg[^>]*class="home-tail-art"[^>]*>[\s\S]*?<\/svg>/)?.[0];
+  assert.ok(decoration);
+  assert.match(decoration, /focusable="false" aria-hidden="true"/);
+  assert.ok((decoration.match(/<path\s/g) || []).length > 20);
+  assert.doesNotMatch(decoration, /<script|<animate|href=/);
+  assert.match(tail, /aria-label="Around the site"/);
+  assert.match(tail, /Beyond the orbit/);
+  assert.match(tail, /href="\/projects\/"/);
+  assert.match(tail, /href="\/blog\/[^"]+\/"/);
+  const footer = home.match(/<footer[^>]*class="site-footer site-footer--home"[^>]*>[\s\S]*?<\/footer>/)?.[0];
+  assert.ok(footer);
+  assert.match(footer, /Patryk Opilka/);
+  assert.match(footer, /Made with curiosity\. Built with Astro\./);
+  assert.match(footer, /href="https:\/\/github\.com\/po63njit"/);
+  for (const path of files.filter(p => p !== "index.html")) {
+    assert.doesNotMatch(read(path), /data-home-landing-tail|class="[^"]*(?:home-landing|site-footer--home)/);
+    assert.match(read(path), /<footer class="site-footer"/);
+  }
+});

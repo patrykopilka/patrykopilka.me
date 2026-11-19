@@ -239,3 +239,37 @@ test("long-form figures have accessible titles and static content", () => {
   const kernel = read("s390-linux-kernel");
   if (process.env.BLOG_EXPECT_FIGURES === "1" || kernel.includes("s390-lowcore-title")) check(kernel, ["s390-lowcore-title", "s390-boot-paths-title", "s390-dat-indices-title", "s390-io-routes-title"]);
 });
+
+test("Projects uses a local diagonal carousel around SimpleJim with a readable no-script project list", () => {
+  const page = read("projects/index.html");
+  const gallery = page.match(/<section[^>]*data-project-carousel[^>]*>[\s\S]*?<\/section>/)?.[0];
+  assert.ok(gallery);
+  assert.match(gallery, /data-initial-index="1"/);
+  assert.match(gallery, /<h1[^>]*id="projects-title"[^>]*>Projects/);
+  const cards = [...gallery.matchAll(/<button[^>]*data-carousel-card[^>]*>[\s\S]*?<\/button>/g)].map(([html]) => html);
+  assert.equal(cards.length, 3);
+  assert.match(cards[0], /aria-controls="project-workbench" aria-pressed="false"/);
+  assert.match(cards[1], /aria-controls="project-simplejim" aria-pressed="true"/);
+  assert.match(cards[2], /aria-controls="project-tools" aria-pressed="false"/);
+  assert.equal(cards.filter(card => card.includes("RESERVED")).length, 2);
+  assert.ok(cards.every(card => card.includes('viewBox="0 0 300 400"')));
+  const articles = [...gallery.matchAll(/<article[^>]*data-carousel-panel[^>]*>[\s\S]*?<\/article>/g)].map(([html]) => html);
+  assert.equal(articles.length, 3);
+  for (const item of articles)
+    assert.doesNotMatch(item.match(/^<article[^>]*>/)?.[0], /\shidden(?:\s|=|>)/);
+  assert.match(articles[0], /Back on the workbench\./);
+  assert.match(articles[1], /Record sets, reps, and weight\.[\s\S]*Autosave workout drafts locally\.[\s\S]*Revisit saved workout history\./);
+  assert.match(articles[2], /Useful things, made carefully\./);
+  for (const item of [articles[0], articles[2]]) {
+    assert.match(item, /Being prepared/);
+    assert.doesNotMatch(item, /<ul|<a\s/);
+  }
+  assert.doesNotMatch(gallery, /codepen\.io|<iframe|project-case|polishedcrumb|<script[^>]*src="https?:/i);
+  for (const path of files.filter((p) => p !== "projects/index.html"))
+    assert.doesNotMatch(read(path), /data-project-carousel/);
+  const styles = [...page.matchAll(/<link rel="stylesheet" href="\/([^"]+)"/g)]
+    .map((m) => read(m[1])).join("\n");
+  assert.match(styles, /aspect-ratio:3\/4/);
+  assert.match(styles, /touch-action:pan-y pinch-zoom/);
+  assert.match(styles, /\.project-gallery(?:\[data-astro-cid-[^\]]+\])?\[data-ready\][^{]*\.gallery-stage/);
+});

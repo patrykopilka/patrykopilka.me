@@ -264,3 +264,37 @@ test("homepage alone integrates the footer with a static wave-tail field", () =>
     assert.match(read(path), /<footer class="site-footer"/);
   }
 });
+
+test("sitemap is URL-only XML listing exactly the exported canonical indexable HTML", () => {
+  const body = read("sitemap.xml");
+  const lines = body.trimEnd().split("\n");
+  assert.equal(lines[0], '<?xml version="1.0" encoding="UTF-8"?>');
+  assert.equal(lines[1], '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">');
+  assert.equal(lines.at(-1), "</urlset>");
+  const actual = lines.slice(2, -1).map(line => {
+    const entry = line.match(/^  <url><loc>(https:\/\/patrykopilka\.me\/[^<]*)<\/loc><\/url>$/);
+    assert.ok(entry, `unexpected sitemap entry: ${line}`);
+    const url = new URL(entry[1]);
+    assert.equal(url.origin, "https://patrykopilka.me");
+    assert.ok(url.pathname.endsWith("/"), url.href);
+    assert.equal(url.search + url.hash, "");
+    assert.doesNotMatch(url.pathname, /\.mdx?(?:\/|$)|\/_astro\/|\/licenses\/|\/private\//i);
+    return url.href;
+  });
+  assert.equal(actual.length, new Set(actual).size);
+  const expected = files.filter(path => !/<meta\b[^>]*name=["']robots["'][^>]*content=["'][^"']*noindex/i.test(read(path)))
+    .map(path => {
+      const match = read(path).match(/rel="canonical" href="(https:\/\/patrykopilka\.me\/[^"]*)"/);
+      assert.ok(match, `missing canonical: ${path}`);
+      const fromOutput = 'https://patrykopilka.me/' + path.replace(/index\.html$/, "");
+      assert.equal(match[1], fromOutput, `canonical does not match output: ${path}`);
+      return match[1];
+    });
+  assert.deepEqual(actual.slice().sort(), expected.sort());
+});
+
+test("robots.txt is plain text and names the exact HTTPS sitemap", () => {
+  const robots = read("robots.txt");
+  assert.equal(robots, "User-agent: *\nAllow: /\n\nSitemap: https://patrykopilka.me/sitemap.xml\n");
+  assert.doesNotMatch(robots, /<!doctype|<html/i);
+});

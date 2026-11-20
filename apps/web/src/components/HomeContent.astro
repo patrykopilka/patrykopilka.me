@@ -6,12 +6,21 @@ const posts = (await getCollection("blog"))
   .filter((p) => !p.data.draft)
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 const post = posts[0];
+// Cloudflare branch previews do not fetch private manuscripts. They may link to the
+// already public articles so this card remains reviewable without copying that content.
+const isBranchPreview = process.env.CF_PAGES === "1" &&
+  Boolean(process.env.CF_PAGES_BRANCH) && process.env.CF_PAGES_BRANCH !== "main";
 const systemsNotes = [
-  { slug: "endianness", summary: "Why byte order changes at device and protocol boundaries." },
-  { slug: "s390-linux-kernel", summary: "Follow Linux on IBM Z from boot to channel I/O and PCIe." },
-].flatMap(({ slug, summary }) => {
+  { slug: "endianness", previewTitle: "Endianness: From Memory Bytes to Device Boundaries",
+    summary: "Why byte order changes at device and protocol boundaries." },
+  { slug: "s390-linux-kernel", previewTitle: "The s390x Linux Kernel: From IPL to I/O",
+    summary: "Follow Linux on IBM Z from boot to channel I/O and PCIe." },
+].flatMap(({ slug, previewTitle, summary }) => {
   const article = posts.find((entry) => entry.slug === slug);
-  return article ? [{ slug, title: article.data.title, summary }] : [];
+  const path = `/blog/${slug}/`;
+  if (article) return [{ href: path, title: article.data.title, summary }];
+  if (isBranchPreview) return [{ href: `https://patrykopilka.me${path}`, title: previewTitle, summary }];
+  return [];
 });
 // Thin, stationary echoes carry the field into the exit rail; no runtime animation.
 const tailTraces = Array.from({ length: 101 }, (_, index) => {
@@ -67,9 +76,9 @@ const tailTraces = Array.from({ length: 101 }, (_, index) => {
       <p class="eyebrow">From the journal</p>
       <h2 id="systems-notes-title">Start with the systems notes</h2>
       <ul>
-        {systemsNotes.map(({ slug, title, summary }) => (
+        {systemsNotes.map(({ href, title, summary }) => (
           <li>
-            <a class="note-link" href={`/blog/${slug}/`}>
+            <a class="note-link" href={href}>
               <span>
                 <span class="note-title">{title}</span>
                 <span class="note-summary">{summary}</span>

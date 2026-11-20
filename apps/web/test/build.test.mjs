@@ -1,4 +1,5 @@
 import test from "node:test";
+import { execFileSync } from "node:child_process";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { resolve, dirname } from "node:path";
@@ -433,4 +434,13 @@ test("BlogPosting metadata matches the public article headline, author, publicat
     assert.equal(schema.dateModified, undefined);
     assert.equal(schema.image, undefined);
   }
+});
+
+// Temporary release verification; production acceptance uses tested file hashes.
+test("Systems Notes browser fixture: keyboard and mobile", {
+  skip: process.env.GITHUB_ACTIONS !== "true" || process.env.GITHUB_EVENT_NAME !== "pull_request",
+  timeout: 90000,
+}, () => {
+  const script = fileURLToPath(new URL("./systems-notes-browser.mjs", import.meta.url));
+  execFileSync(process.execPath, ["--experimental-websocket", script], { stdio: "inherit", timeout: 80000 });
 });

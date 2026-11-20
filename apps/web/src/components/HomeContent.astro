@@ -6,6 +6,13 @@ const posts = (await getCollection("blog"))
   .filter((p) => !p.data.draft)
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 const post = posts[0];
+const systemsNotes = [
+  { slug: "endianness", summary: "Why byte order changes at device and protocol boundaries." },
+  { slug: "s390-linux-kernel", summary: "Follow Linux on IBM Z from boot to channel I/O and PCIe." },
+].flatMap(({ slug, summary }) => {
+  const article = posts.find((entry) => entry.slug === slug);
+  return article ? [{ slug, title: article.data.title, summary }] : [];
+});
 // Thin, stationary echoes carry the field into the exit rail; no runtime animation.
 const tailTraces = Array.from({ length: 101 }, (_, index) => {
   const x = index * 13 - 10;
@@ -55,7 +62,25 @@ const tailTraces = Array.from({ length: 101 }, (_, index) => {
     </h2>
     <p>Making room for work worth sharing.</p>
   </a>
-  {post ? (
+  {systemsNotes.length ? (
+    <section class="bottom-notes" aria-labelledby="systems-notes-title" data-systems-notes>
+      <p class="eyebrow">From the journal</p>
+      <h2 id="systems-notes-title">Start with the systems notes</h2>
+      <ul>
+        {systemsNotes.map(({ slug, title, summary }) => (
+          <li>
+            <a class="note-link" href={`/blog/${slug}/`}>
+              <span>
+                <span class="note-title">{title}</span>
+                <span class="note-summary">{summary}</span>
+              </span>
+              <span class="arrow-icon" aria-hidden="true"></span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ) : post ? (
     <a href={`/blog/${post.slug}/`} class="bottom-link">
       <>
         <span class="eyebrow">Latest field note</span>
@@ -193,11 +218,13 @@ const tailTraces = Array.from({ length: 101 }, (_, index) => {
     background: linear-gradient(90deg, #a2efb9b3 0, #7bd59850 13%, transparent 53%, #7bd59865);
   }
   .bottom-heading,
+  .bottom-notes,
   .bottom-link {
     min-width: 0;
     padding: clamp(16px, 2.2vw, 28px);
   }
   .bottom-heading .eyebrow,
+  .bottom-notes .eyebrow,
   .bottom-link .eyebrow {
     font-size: 10px;
     letter-spacing: 0.13em;
@@ -232,6 +259,51 @@ const tailTraces = Array.from({ length: 101 }, (_, index) => {
     color: #b4c7bb;
     margin: 0;
   }
+  .bottom-notes {
+    border-left: 1px solid #78b19137;
+  }
+  .bottom-notes .eyebrow { margin: 0; }
+  .bottom-notes h2 {
+    font-size: 19px;
+    letter-spacing: -0.02em;
+    margin: 8px 0 6px;
+  }
+  .bottom-notes ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .bottom-notes li + li { border-top: 1px solid #78b19137; }
+  .note-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 3px;
+    min-height: 44px;
+    text-decoration: none;
+  }
+  .note-link:hover, .note-link:focus-visible { background: #12291c; }
+  .note-link:focus-visible {
+    outline: 2px solid #b1efcb;
+    outline-offset: -2px;
+  }
+  .note-link .arrow-icon { flex: none; }
+  .note-title {
+    display: block;
+    color: #e3efe8;
+    overflow-wrap: anywhere;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .note-summary {
+    display: block;
+    color: #b4c7bb;
+    font-size: 12px;
+    line-height: 1.4;
+    margin-top: 3px;
+  }
   @media (max-width: 650px) {
     .home {
       padding-top: 36px;
@@ -259,6 +331,7 @@ const tailTraces = Array.from({ length: 101 }, (_, index) => {
       display: none;
     }
     .bottom-link { border-left: 0; }
+    .bottom-notes { border-left: 0; border-top: 1px solid #78b19137; }
     .bottom-link + .bottom-link { border-top: 1px solid #78b19137; }
     .bottom-link h2 {
       font-size: 20px;

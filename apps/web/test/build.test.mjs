@@ -182,7 +182,16 @@ test("rendered portfolio and journal navigation use direct directory URLs", () =
   const journal = read("blog/index.html");
   const featured = /<a class="featured-article[^"]*" href="([^"]+)"/.exec(journal);
   assert.ok(featured, "Journal latest article link is missing");
-  assert.ok(read("index.html").includes(`href="${featured[1]}"`), "Home and Journal must link to the same latest article");
+  const home = read("index.html");
+  const systemsNotes = home.match(/<section[^>]*\bdata-systems-notes[^>]*>[\s\S]*?<\/section>/)?.[0];
+  if (!systemsNotes) {
+    assert.ok(home.includes(`href="${featured[1]}"`), "Fallback preserves the latest article link");
+  }
+  for (const slug of ["endianness", "s390-linux-kernel"]) {
+    const published = files.includes(`blog/${slug}/index.html`);
+    const links = (systemsNotes ?? "").split(`href="/blog/${slug}/"`).length - 1;
+    assert.equal(links, Number(published), `Systems Notes link for ${slug}`);
+  }
   if (files.includes("blog/endianness/index.html")) {
     assert.match(journal, /href="\/blog\/endianness\/"/);
   }

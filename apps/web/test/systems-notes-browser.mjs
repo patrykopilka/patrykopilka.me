@@ -16,7 +16,7 @@ const env = { ...process.env, BLOG_CONTENT_DIR: temp, ASTRO_TELEMETRY_DISABLED: 
 delete env.CI;
 delete env.CF_PAGES;
 let chrome;
-let ws;
+let sessionId;
 const server = createServer(async(req,res) => {
   const url = new URL(req.url, 'http://localhost');
   const p = url.pathname.endsWith('/') ? url.pathname + 'index.html' : url.pathname;
@@ -39,7 +39,7 @@ const pending = new Map();
 function cdp(method, params = {}) {
   return new Promise((resolve, reject) => {
     const id = ++next; pending.set(id, [resolve, reject]);
-    ws.send(JSON.stringify({id, method, params}));
+    chrome.stdio[3].write(JSON.stringify({id, method, params, ...(sessionId ? {sessionId} : {})})+"\0");
   });
 }
 async function read(expression) {
@@ -66,15 +66,24 @@ try {
   await new Promise((resolve,reject)=>server.listen(0,'127.0.0.1',resolve).once('error',reject));
   const base='http://127.0.0.1:'+server.address().port;
   chrome=spawn(process.env.CHROME_BIN||'google-chrome',['--headless','--no-sandbox','--disable-background-networking','--disable-dev-shm-usage',
-    '--remote-debugging-port=0','--user-data-dir='+join(temp,'chrome'),'about:blank'], {stdio:'ignore'});
-  let launchError;
-  chrome.on('error',err=>{launchError=err;});
-  const listen = await poll(async()=>launchError ? 'error' : (await readFile(join(temp,'chrome','DevToolsActivePort'),'utf8')).split('\n')[0], 'Chrome DevTools');
-  if(launchError) throw launchError;
-  const tabs=await (await fetch('http://127.0.0.1:'+listen+'/json/list')).json();
-  ws=new WebSocket(tabs.find(t=>t.type==='page').webSocketDebuggerUrl);
-  await new Promise((resolve,reject)=>{ws.addEventListener('open',resolve,{once:true});ws.addEventListener('error',reject,{once:true});});
-  ws.addEventListener('message',({data})=>{const msg=JSON.parse(data);const cb=pending.get(msg.id);if(!cb)return;pending.delete(msg.id);if(msg.error) cb[1](Error(JSON.stringify(msg.error)));else cb[0](msg.result);});
+    '--remote-debugging-pipe','--user-data-dir='+join(temp,'chrome'),'about:blank'],
+    {stdio:['ignore','ignore','inherit','pipe','pipe']});
+  chrome.on('error',err=>{for(const cb of pending.values()) cb[1](err);pending.clear();});
+  chrome.on('exit',(code)=>{for(const cb of pending.values()) cb[1](Error('Chrome exited: '+code));pending.clear();});
+  let buffer='';
+  chrome.stdio[4].setEncoding('utf8');
+  chrome.stdio[4].on('data',chunk=>{
+    buffer+=chunk;
+    while(buffer.includes("\0")){
+      const i=buffer.indexOf("\0"), msg=JSON.parse(buffer.slice(0,i));
+      buffer=buffer.slice(i+1);
+      const cb=pending.get(msg.id);if(!cb)continue;
+      pending.delete(msg.id);
+      if(msg.error) cb[1](Error(JSON.stringify(msg.error)));else cb[0](msg.result);
+    }
+  });
+  const {targetId}=await cdp('Target.createTarget',{url:'about:blank'});
+  ({sessionId}=await cdp('Target.attachToTarget',{targetId,flatten:true}));
   await cdp('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});
   await cdp('Emulation.setDeviceMetricsOverride',{width:1440,height:900,deviceScaleFactor:1,mobile:false});
   await cdp('Page.navigate',{url:base+'/'});
@@ -101,7 +110,6 @@ try {
   }
   console.log('Systems Notes browser QA passed: desktop Tab, visible focus and Enter; 375px layout without horizontal scroll, 44px-or-taller rows, both touch routes.');
 } finally {
-  ws?.close();
   if(chrome?.pid) chrome.kill('SIGTERM');
   server.close();
   try { await rm(temp,{recursive:true,force:true,maxRetries:3,retryDelay:100}); } catch {}
